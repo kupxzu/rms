@@ -71,6 +71,39 @@
                         </li>
                     </ul>
                 </li>
+
+                <!-- Meeting Dropdown -->
+                <li class="nav-item has-treeview <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_upload.php', 'view_upload.php']) ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_upload.php', 'view_upload.php']) ? 'active' : '' ?>">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>
+                           Announcement
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="admin_upload.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'admin_upload.php' ? 'active' : '' ?>">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Upload File</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="view_upload.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'view_upload.php' ? 'active' : '' ?>">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>View Upload</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Logs (Not in Dropdown) -->
+                <li class="nav-item">
+                    <a href="admin_viewed_files.php" class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'admin_viewed_files.php' ? 'active' : '' ?>">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p>Logs</p>
+                    </a>
+                </li>
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

@@ -6,27 +6,32 @@ if ($_SESSION['role'] != 'admin') {
 }
 include '../includes/db.php';
 
-// Fetch data for dashboard
-$total_records = $conn->query("SELECT COUNT(*) AS count FROM records")->fetch_assoc()['count'];
+// Fetch Total Users Count
 $total_users = $conn->query("SELECT COUNT(*) AS count FROM users")->fetch_assoc()['count'];
-$total_categories = $conn->query("SELECT COUNT(*) AS count FROM categories")->fetch_assoc()['count'];
-$total_transactions = $conn->query("SELECT COUNT(*) AS count FROM transactions")->fetch_assoc()['count'];
 
-// Browser Usage Data for Pie Chart
-$transaction_types = $conn->query("SELECT transaction_type, COUNT(*) AS count FROM transactions GROUP BY transaction_type");
-$browser_data = [];
-while ($row = $transaction_types->fetch_assoc()) {
-    $browser_data[$row['transaction_type']] = $row['count'];
+// Fetch Ordinances and Resolutions Status Counts
+$statuses = ['Pending', 'Approved', 'Rejected'];
+$status_counts = [];
+foreach ($statuses as $status) {
+    $count_ordinances = $conn->query("SELECT COUNT(*) AS count FROM ordinances WHERE status = '$status'")->fetch_assoc()['count'];
+    $count_resolutions = $conn->query("SELECT COUNT(*) AS count FROM resolutions WHERE status = '$status'")->fetch_assoc()['count'];
+    $status_counts[$status] = $count_ordinances + $count_resolutions;
 }
 
-// Recently Added Transactions
-$recent_transactions = $conn->query(
-    "SELECT transactions.id, records.title AS record, users.username AS user, transactions.transaction_type, transactions.transaction_date 
-    FROM transactions 
-    JOIN records ON transactions.record_id = records.id 
-    JOIN users ON transactions.user_id = users.id 
-    ORDER BY transactions.transaction_date DESC LIMIT 5"
-);
+// Fetch Users Per Department
+$department_users = $conn->query("SELECT d.name AS department, COUNT(u.id) AS user_count 
+                                  FROM department_position dp 
+                                  JOIN users u ON u.id_dp = dp.id
+                                  JOIN departments d ON dp.department_id = d.id
+                                  GROUP BY d.id");
+
+$department_labels = [];
+$department_data = [];
+while ($row = $department_users->fetch_assoc()) {
+    $department_labels[] = $row['department'];
+    $department_data[] = $row['user_count'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,24 +66,11 @@ $recent_transactions = $conn->query(
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-3 col-6">
-                        <!-- Small box -->
-                        <div class="small-box bg-info">
-                            <div class="inner">
-                                <h3><?php echo $total_records; ?></h3>
-                                <p>Records</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-folder"></i>
-                            </div>
-                            <a href="manage_records.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-6">
+                    <div class="col-lg-4 col-6">
                         <div class="small-box bg-success">
                             <div class="inner">
                                 <h3><?php echo $total_users; ?></h3>
-                                <p>Users</p>
+                                <p>Total Users</p>
                             </div>
                             <div class="icon">
                                 <i class="fas fa-users"></i>
@@ -86,118 +78,118 @@ $recent_transactions = $conn->query(
                             <a href="manage_users.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-warning">
-                            <div class="inner">
-                                <h3><?php echo $total_categories; ?></h3>
-                                <p>Categories</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-tags"></i>
-                            </div>
-                            <a href="manage_categories.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-danger">
-                            <div class="inner">
-                                <h3><?php echo $total_transactions; ?></h3>
-                                <p>Transactions</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-exchange-alt"></i>
-                            </div>
-                            <a href="manage_transactions.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Pie Chart -->
+                <!-- Pie Chart for Status -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Transaction Types</h3>
+                                <h3 class="card-title">File Status Distribution</h3>
                             </div>
                             <div class="card-body">
-                                <canvas id="transactionPieChart" style="height:250px"></canvas>
+                                <canvas id="statusPieChart" style="height:250px"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Line Chart for User Departments -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Users Per Department</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="departmentLineChart" style="height:250px"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recently Added Transactions -->
+                <!-- Table for File Status -->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Recently Added Transactions</h3>
+                                <h3 class="card-title">File Status Summary</h3>
                             </div>
                             <div class="card-body">
-                                <table class="table table-bordered table-hover">
+                                <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Record</th>
-                                            <th>User</th>
-                                            <th>Transaction Type</th>
-                                            <th>Transaction Date</th>
+                                            <th>Status</th>
+                                            <th>Count</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php while ($row = $recent_transactions->fetch_assoc()) { ?>
-                                            <tr>
-                                                <td><?php echo $row['id']; ?></td>
-                                                <td><?php echo $row['record']; ?></td>
-                                                <td><?php echo $row['user']; ?></td>
-                                                <td><?php echo $row['transaction_type']; ?></td>
-                                                <td><?php echo date('F j, Y', strtotime($row['transaction_date'])); ?></td>
-                                                </tr>
-                                        <?php } ?>
+                                        <tr class="table-warning">
+                                            <td>Pending</td>
+                                            <td><?php echo $status_counts['Pending']; ?></td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <td>Approved</td>
+                                            <td><?php echo $status_counts['Approved']; ?></td>
+                                        </tr>
+                                        <tr class="table-danger">
+                                            <td>Rejected</td>
+                                            <td><?php echo $status_counts['Rejected']; ?></td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
     </div>
-    <!-- /.content-wrapper -->
 
 </div>
-<!-- ./wrapper -->
+
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
 <script>
-    $(function() {
-        $('[data-widget="pushmenu"]').PushMenu();
-    });
-
-    // Prepare data for pie chart
-    const transactionData = <?php echo json_encode(array_values($browser_data)); ?>;
-    const transactionLabels = <?php echo json_encode(array_keys($browser_data)); ?>;
-
-    // Render pie chart
-    const ctx = document.getElementById('transactionPieChart').getContext('2d');
-    new Chart(ctx, {
+    // Pie Chart for Approved, Pending, Rejected
+    const statusData = [<?php echo $status_counts['Pending']; ?>, <?php echo $status_counts['Approved']; ?>, <?php echo $status_counts['Rejected']; ?>];
+    const statusLabels = ['Pending', 'Approved', 'Rejected'];
+    
+    new Chart(document.getElementById('statusPieChart'), {
         type: 'pie',
         data: {
-            labels: transactionLabels,
+            labels: statusLabels,
             datasets: [{
-                data: transactionData,
-                backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef'],
+                data: statusData,
+                backgroundColor: ['#f39c12', '#00a65a', '#f56954'],
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            legend: {
-                position: 'top',
-            },
+        }
+    });
+
+    // Line Chart for Users Per Department
+    new Chart(document.getElementById('departmentLineChart'), {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($department_labels); ?>,
+            datasets: [{
+                label: 'Users Count',
+                data: <?php echo json_encode($department_data); ?>,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
         }
     });
 </script>
+
 </body>
 </html>

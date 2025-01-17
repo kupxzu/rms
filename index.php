@@ -38,7 +38,7 @@
             }
             ?>
 
-			<a href="#">Forgot your password?</a>
+			<a href="#" hidden	>Forgot your password?</a>
 			<button type="submit">Sign In</button>
 		</form>
 	</div>

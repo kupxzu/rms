@@ -16,7 +16,9 @@ $sql = "SELECT
         FROM users 
         LEFT JOIN department_position dp ON users.id_dp = dp.id 
         LEFT JOIN departments d ON dp.department_id = d.id 
-        LEFT JOIN positions p ON dp.position_id = p.id";
+        LEFT JOIN positions p ON dp.position_id = p.id
+        WHERE users.active = 1"; // Only fetch active users
+
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -43,6 +45,8 @@ $result = $conn->query($sql);
                     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addUserModal">
                         <i class="fas fa-user-plus"></i> Add User
                     </button>
+
+                    <a href="user_change_password.php" class="btn btn-warning btn-sm"><i class="fas fa-key"></i> Password</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-hover">
@@ -63,16 +67,15 @@ $result = $conn->query($sql);
                                     <td><?php echo $row['department_name'] ?: 'Unassigned'; ?></td>
                                     <td><?php echo $row['position_name'] ?: 'Unassigned'; ?></td>
                                     <td>
-                                        <button class="btn btn-success btn-sm edit-user" 
+                                        <button class="btn btn-primary btn-sm edit-user" 
                                                 data-id="<?php echo $row['id']; ?>" 
                                                 data-id-dp="<?php echo $row['id_dp']; ?>" 
                                                 data-username="<?php echo $row['username']; ?>" 
                                                 data-toggle="modal" 
-                                                data-target="#editUserModal">Edit</button>
-                                        <button class="btn btn-danger btn-sm delete-user" 
-                                                data-id="<?php echo $row['id']; ?>" 
-                                                data-toggle="modal" 
-                                                data-target="#deleteUserModal">Delete</button>
+                                                data-target="#editUserModal"><i class="fas fa-edit"></i> Edit</button>
+                                                <button class="btn btn-sm btn-danger archive-user" data-id="<?= $row['id'] ?>">
+                        <i class="fas fa-archive"></i> Archive
+                    </button>
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -257,6 +260,35 @@ $result = $conn->query($sql);
         </form>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+    $(".archive-user").click(function() {
+        var user_id = $(this).data("id");
+
+        if (confirm("Are you sure you want to archive this user?")) {
+            $.ajax({
+                url: "function/archive_user.php",
+                type: "POST",
+                data: { user_id: user_id },
+                dataType: "json",
+                success: function(response) {
+                    if (response.status === "success") {
+                        alert(response.message);
+                        location.reload(); // Refresh the page after archiving
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function() {
+                    alert("Failed to connect to the server.");
+                }
+            });
+        }
+    });
+});
+</script>
 
 
 

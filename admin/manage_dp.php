@@ -40,7 +40,7 @@ $positions = $conn->query("SELECT * FROM positions");
             <div class="container-fluid">
                 <div class="row">
                     <!-- Manage Departments -->
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">Departments</h3>
@@ -69,8 +69,8 @@ $positions = $conn->query("SELECT * FROM positions");
                                                 <td><?php echo $row['department_name']; ?></td>
                                                 <td><?php echo $row['positions'] ?: 'No Positions'; ?></td>
                                                 <td>
-                                                    <button class="btn btn-success btn-sm edit-department" data-id="<?php echo $row['department_id']; ?>" data-name="<?php echo $row['department_name']; ?>" data-toggle="modal" data-target="#editDepartmentModal">Edit</button>
-                                                    <button class="btn btn-danger btn-sm delete-department" data-id="<?php echo $row['department_id']; ?>" data-toggle="modal" data-target="#deleteDepartmentModal">Delete</button>
+                                                    <button class="btn btn-success btn-sm edit-department" data-id="<?php echo $row['department_id']; ?>" data-name="<?php echo $row['department_name']; ?>" data-toggle="modal" data-target="#editDepartmentModal"><i class="fas fa-edit"></i> Edit</button>
+                                                    <button class="btn btn-danger btn-sm delete-department" data-id="<?php echo $row['department_id']; ?>" data-toggle="modal" data-target="#deleteDepartmentModal"><i class="fas fa-trash"></i> Delete</button>
                                                 </td>
                                             </tr>
                                         <?php } ?>

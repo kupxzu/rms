@@ -5,334 +5,149 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-include '../includes/db.php';
+require '../includes/db.php'; // Ensure this file connects to your database
 
-$successMessage = $_SESSION['success'] ?? null;
-$errorMessage = $_SESSION['error'] ?? null;
-unset($_SESSION['success'], $_SESSION['error']);
+$user_id = $_SESSION['user_id'];
+
+// Fetch pending ordinances submitted by the current user
+$query = "SELECT id, title, description, submission_date, attachment, status 
+          FROM ordinances 
+          WHERE submitted_by = ? AND status = 'Pending' 
+          ORDER BY submission_date DESC";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ordinance Mailbox</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    
-    <style>
-        .sticky-chat {
-            position: sticky;
-            top: 20px;
-        }
-        .btn-reply.active {
-        background-color: #007bff;
-        color: white;
-    }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Ordinance</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
+
+  <div class="wrapper">
     <?php include '../includes/user_navbar.php'; ?>
     <?php include '../includes/user_sidebar.php'; ?>
 
     <div class="content-wrapper">
-        <section class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
-                        <h1>Ordinance Mailbox</h1>
-                    </div>
-                </div>
+      <section class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1>Compose Ordinance</h1>
             </div>
-        </section>
-
-        <?php if ($successMessage): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($successMessage); ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-        <?php if ($errorMessage): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo htmlspecialchars($errorMessage); ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
-        <section class="content">
-            <div class="row">
-                <!-- Sidebar -->
-                <div class="col-md-3">
-                    <a href="compose_ordinance.php" class="btn btn-primary btn-block mb-3">
-                        <i class="fas fa-edit"></i> Compose Ordinance
-                    </a>
-                    <div class="sticky-chat">
-    <div class="card card-primary card-outline direct-chat direct-chat-primary">
-    <div class="card-header">
-    <h3 class="card-title">
-        <span id="direct-chat-title">Reply</span>
-    </h3>
-    <div class="card-tools">
-        <span id="new-messages-badge" class="badge badge-primary">0</span>
-        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-        </button>
-    </div>
-</div>
-
-        <div class="card-body">
-            <div id="direct-chat-messages" class="direct-chat-messages">
-                <div class="text-center text-muted">Click "Reply" to start a conversation.</div>
-            </div>
+          </div>
         </div>
-        <div class="card-footer">
-        <form id="direct-chat-form">
-    <input type="hidden" id="related-item-id" name="related_item_id">
-    <input type="hidden" id="related-item-type" name="related_item_type" value="ordinance">
-    <input type="hidden" id="receiver-id" name="receiver_id" value="3"> <!-- Example receiver ID -->
-    <div class="input-group">
-        <input type="text" name="message" id="message-input" class="form-control" placeholder="Type a message..." required>
-        <span class="input-group-append">
-            <button type="submit" class="btn btn-primary">Send</button>
-        </span>
-    </div>
-</form>
+      </section>
 
-        </div>
-    </div>
-</div>
+      <section class="content">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-9">
+              <div class="card">
+                <div class="card-header p-2">
+                  <ul class="nav nav-pills">
+                    <li class="nav-item">
+                      <a class="nav-link active" href="#activity" data-toggle="tab">Submission</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="#timeline" data-toggle="tab">View Submit</a>
+                    </li>
+                  </ul>
                 </div>
-                
-                <!-- Inbox -->
-                <div class="col-md-9">
-                <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Your Attachments (Ordinances)</h3>
-    </div>
-    <div class="card-body">
-        <table class="table table-hover" id="user-attachments-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Attachment</th>
-                    <th>Status</th>
-                    <th>Submission Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $userId = $_SESSION['user_id']; // Current logged-in user ID
-                $sql = "
-                    SELECT 
-                        o.id, o.title, o.attachment, o.status, o.submission_date
-                    FROM ordinances o
-                    WHERE o.submitted_by = $userId
-                    ORDER BY submission_date DESC";
-                $result = $conn->query($sql);
-
-                while ($row = $result->fetch_assoc()) {
-                ?>
-                <tr>
-                    <td><?php echo $row['title']; ?></td>
-                    <td>
-                        <?php
-                        $extension = strtolower(pathinfo($row['attachment'], PATHINFO_EXTENSION));
-                        echo $extension === 'pdf' ? '<i class="fas fa-file-pdf"></i>' : '<i class="fas fa-file-image"></i>';
-                        ?>
-                        <?php echo $row['attachment']; ?>
-                    </td>
-                    <td>
-                        <?php echo $row['status'] == 'Pending' ? '<span class="badge badge-warning">Pending</span>' : ($row['status'] == 'Approved' ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>'); ?>
-                    </td>
-                    <td><?php echo $row['submission_date']; ?></td>
-                    <td>
-                        <a href="../uploads/ordinance/<?php echo urlencode($row['attachment']); ?>" target="_blank" class="btn btn-info btn-sm" hidden>
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <button class="btn btn-primary btn-sm btn-reply" data-id="<?php echo $row['id']; ?>" data-type="ordinance">
-                            <i class="fas fa-eye"></i> View Reply
-                        </button>
-                    </td>
-                </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-                <div class="card">
-    <div class="card-header">
-        <h3 class="card-title">All Attachments (Ordinances)</h3>
-        <div class="card-tools">
-            <div class="input-group input-group-sm">
-                <input type="text" id="search-input" class="form-control" placeholder="Search...">
-                <input type="date" id="date-filter" class="form-control ml-2">
-                <div class="input-group-append">
-                    <button id="filter-btn" class="btn btn-primary"><i class="fas fa-filter"></i></button>
-                    <button id="reset-btn" class="btn btn-secondary ml-1">Reset</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <table class="table table-hover" id="attachments-table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Attachment</th>
-                    <th>Submitted By</th>
-                    <th>Status</th>
-                    <th>Submission Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                $sql = "
-                    SELECT 
-                        o.id, o.title, o.attachment, o.status, o.submission_date, u.username AS submitted_by
-                    FROM ordinances o
-                    JOIN users u ON o.submitted_by = u.id
-                    ORDER BY submission_date DESC";
-                $result = $conn->query($sql);
-
-                while ($row = $result->fetch_assoc()) {
-                ?>
-                <tr>
-                    <td><?php echo $row['title']; ?></td>
-                    <td>
-                        <?php
-                        $extension = strtolower(pathinfo($row['attachment'], PATHINFO_EXTENSION));
-                        echo $extension === 'pdf' ? '<i class="fas fa-file-pdf"></i>' : '<i class="fas fa-file-image"></i>';
-                        ?>
-                        <?php echo $row['attachment']; ?>
-                    </td>
-                    <td><?php echo $row['submitted_by']; ?></td>
-                    <td>
-                        <?php echo $row['status'] == 'Pending' ? '<span class="badge badge-warning">Pending</span>' : ($row['status'] == 'Approved' ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>'); ?>
-                    </td>
-                    <td><?php echo $row['submission_date']; ?></td>
-                    <td>
-                        <a href="../uploads/ordinance/<?php echo urlencode($row['attachment']); ?>" target="_blank" class="btn btn-info btn-sm">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <button class="btn btn-primary btn-sm btn-reply" data-id="<?php echo $row['id']; ?>" data-type="ordinance">
-                            <i class="fas fa-reply"></i> Reply
-                        </button>
-                    </td>
-                </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-                </div><!-- /.col-md-9 -->
-            </div>
-        </section>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-<script>
-    
-    $(document).ready(function () {
-    $('.btn-reply').on('click', function () {
-        const itemId = $(this).data('id');
-        const itemType = $(this).data('type');
-        const itemTitle = $(this).closest('tr').find('td:first').text(); 
-        $('#related-item-id').val(itemId);
-        $('#related-item-type').val(itemType);
-        $('.btn-reply').removeClass('active'); 
-        $(this).addClass('active'); 
-        $('#direct-chat-title').text(`Chat for: ${itemTitle}`);
-        $('#message-input, #direct-chat-form button').prop('disabled', false);
-        fetchMessages(itemId, itemType);
-    });
-
-    function fetchMessages(itemId, itemType) {
-        $.ajax({
-            url: 'fetch_messages.php',
-            method: 'GET',
-            data: { item_id: itemId, item_type: itemType },
-            success: function (response) {
-                const messages = JSON.parse(response);
-                const container = $('#direct-chat-messages');
-                container.empty();
-
-                if (messages.length === 0) {
-                    container.append('<div class="text-center text-muted">No messages yet.</div>');
-                    return;
-                }
-
-                messages.forEach(msg => {
-                    const alignClass = msg.sender_id === <?php echo $_SESSION['user_id']; ?> ? 'right' : '';
-                    const senderName = alignClass ? 'You' : msg.sender_name;
-                    const timestamp = new Date(msg.sent_at).toLocaleString();
-
-                    container.append(`
-                        <div class="direct-chat-msg ${alignClass}">
-                            <div class="direct-chat-infos clearfix">
-                                <span class="direct-chat-name ${alignClass ? 'float-right' : 'float-left'}">${senderName}</span>
-                                <span class="direct-chat-timestamp ${alignClass ? 'float-left' : 'float-right'}">${timestamp}</span>
+                <div class="card-body">
+                  <div class="tab-content">
+                    <!-- Ordinance Form Tab -->
+                    <div class="active tab-pane" id="activity">
+                      <form action="function/submit_ordinance.php" method="POST" enctype="multipart/form-data">
+                        <div class="card-body">
+                          <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" name="title" id="title" class="form-control" placeholder="Enter title" required>
+                          </div>
+                          <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea name="description" id="description" class="form-control" placeholder="Enter description" rows="4" required></textarea>
+                          </div>
+                          <div class="form-group">
+                            <label for="attachment">Attachment</label>
+                            <div class="custom-file">
+                              <input type="file" name="attachment" id="attachment" class="custom-file-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" required>
+                              <label class="custom-file-label" for="attachment">Choose file</label>
                             </div>
-                            <div class="direct-chat-text">${msg.message}</div>
+                            <small class="form-text text-muted">Allowed formats: PDF, DOCX, PNG, JPG</small>
+                          </div>
                         </div>
-                    `);
-                });
-            }
-        });
-    }
+                        <div class="card-footer">
+                          <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
+                          <button type="reset" class="btn btn-secondary">Reset</button>
+                        </div>
+                      </form>
+                    </div>
 
-    $('#direct-chat-form').on('submit', function (e) {
-        e.preventDefault();
+                    <!-- View Submit Tab - Displays Pending Ordinances -->
+                    <div class="tab-pane" id="timeline">
+                      <h5>Pending Ordinances</h5>
+                      <?php if ($result->num_rows > 0): ?>
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th>Title</th>
+                              <th>Description</th>
+                              <th>Submitted On</th>
+                              <th>Attachment</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                              <tr>
+                                <td><?= htmlspecialchars($row['title']) ?></td>
+                                <td><?= nl2br(htmlspecialchars($row['description'])) ?></td>
+                                <td><?= date("F d, Y", strtotime($row['submission_date'])) ?></td>
+                                <td>
+                                  <?php if ($row['attachment']): ?>
+                                    <a class="btn btn-sm btn-info" href="../uploads/ordinance/<?= htmlspecialchars($row['attachment']) ?>" target="_blank"><i class="fas fa-eye"></i> View File</a>
+                                  <?php else: ?>
+                                    No Attachment
+                                  <?php endif; ?>
+                                </td>
+                                <td><span class="badge badge-warning"><?= htmlspecialchars($row['status']) ?></span></td>
+                              </tr>
+                            <?php endwhile; ?>
+                          </tbody>
+                        </table>
+                      <?php else: ?>
+                        <p>No pending ordinances found.</p>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </div> 
+              </div> 
+            </div> 
+          </div> 
+        </div> 
+      </section>
+    </div>
+  </div>
 
-        const formData = $(this).serialize();
-        $.post('send_message.php', formData, function () {
-            fetchMessages($('#related-item-id').val(), $('#related-item-type').val());
-            $('#message-input').val(''); // Clear input
-        });
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="function/nav_function.js"></script>
+  <script>
+    $(document).on('change', '.custom-file-input', function (e) {
+      var fileName = e.target.files[0].name;
+      $(this).next('.custom-file-label').html(fileName);
     });
-});
-
-$(document).ready(function () {
-    const tableRows = $('#attachments-table tbody tr');
-
-    // Filter Function
-    $('#filter-btn').on('click', function () {
-        const searchValue = $('#search-input').val().toLowerCase();
-        const dateValue = $('#date-filter').val();
-
-        tableRows.each(function () {
-            const title = $(this).find('td:eq(0)').text().toLowerCase();
-            const submissionDate = $(this).find('td:eq(4)').text();
-
-            const matchesSearch = !searchValue || title.includes(searchValue);
-            const matchesDate = !dateValue || submissionDate === dateValue;
-
-            $(this).toggle(matchesSearch && matchesDate);
-        });
-    });
-
-    // Reset Filters
-    $('#reset-btn').on('click', function () {
-        $('#search-input').val('');
-        $('#date-filter').val('');
-        tableRows.show();
-    });
-});
-
-
-</script>
+  </script>
 </body>
 </html>

@@ -6,8 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Query to check if the user exists
-    $sql = "SELECT * FROM users WHERE username = ?";
+    // Query to check if the user exists and is active
+    $sql = "SELECT * FROM users WHERE username = ? AND active = 1"; // Only active users can log in
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -23,14 +23,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role']; // Optional if roles are defined
 
+            // Insert login activity into user_activity table
+            $activity_query = "INSERT INTO user_activity (user_id, action) VALUES (?, 'login')";
+            $stmt = $conn->prepare($activity_query);
+            $stmt->bind_param("i", $user['id']);
+            $stmt->execute();
+
             // Redirect to dashboard or another page
             header('Location: admin/dashboard.php');
             exit();
         } else {
-            $_SESSION['error'] = "Username or password is not match.";
+            $_SESSION['error'] = "Username or password is incorrect.";
         }
     } else {
-        $_SESSION['error'] = "Username or password is not match.";
+        $_SESSION['error'] = "Your account is inactive, contact the admin.";
     }
 
     // Redirect back to the login page with an error message
