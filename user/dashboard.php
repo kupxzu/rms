@@ -31,6 +31,37 @@ $result_attachments = $stmt_attachments->get_result();
 $attachments = ['Pending' => 0, 'Approved' => 0, 'Rejected' => 0];
 while ($row = $result_attachments->fetch_assoc()) {
     $attachments[$row['status']] = $row['count'];
+
+    // Fetch Ordinance Counts
+$sql_ordinances = "
+SELECT status, COUNT(*) AS count 
+FROM ordinances 
+WHERE submitted_by = ? 
+GROUP BY status";
+$stmt_ordinances = $conn->prepare($sql_ordinances);
+$stmt_ordinances->bind_param("i", $user_id);
+$stmt_ordinances->execute();
+$result_ordinances = $stmt_ordinances->get_result();
+$ordinanceCounts = ['Pending' => 0, 'Approved' => 0, 'Rejected' => 0];
+while ($row = $result_ordinances->fetch_assoc()) {
+$ordinanceCounts[$row['status']] = $row['count'];
+}
+
+// Fetch Resolution Counts
+$sql_resolutions = "
+SELECT status, COUNT(*) AS count 
+FROM resolutions 
+WHERE submitted_by = ? 
+GROUP BY status";
+$stmt_resolutions = $conn->prepare($sql_resolutions);
+$stmt_resolutions->bind_param("i", $user_id);
+$stmt_resolutions->execute();
+$result_resolutions = $stmt_resolutions->get_result();
+$resolutionCounts = ['Pending' => 0, 'Approved' => 0, 'Rejected' => 0];
+while ($row = $result_resolutions->fetch_assoc()) {
+$resolutionCounts[$row['status']] = $row['count'];
+}
+
 }
 ?>
 
@@ -109,27 +140,29 @@ while ($row = $result_attachments->fetch_assoc()) {
 
                 <!-- Graphs -->
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Ordinances Status</h3>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="ordinanceChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ordinance Status</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="ordinancePieChart"></canvas>
+        </div>
+    </div>
+</div>
 
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Resolutions Status</h3>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="resolutionChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Resolution Status</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="resolutionPieChart"></canvas>
+        </div>
+    </div>
+</div>
+
+
                 </div>
 
             </div>
@@ -149,30 +182,60 @@ while ($row = $result_attachments->fetch_assoc()) {
 <!-- Graphs Script -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const ordinanceData = {
-        labels: ['Pending', 'Approved', 'Rejected'],
-        datasets: [{
-            label: 'Ordinances',
-            data: [<?php echo $attachments['Pending']; ?>, <?php echo $attachments['Approved']; ?>, <?php echo $attachments['Rejected']; ?>],
-            backgroundColor: ['#f39c12', '#007bff', '#dc3545']
-        }]
-    };
+    const colors = ['#f39c12', '#007bff', '#dc3545']; // Colors for Pending, Approved, Rejected
 
-    const resolutionData = {
-        labels: ['Pending', 'Approved', 'Rejected'],
-        datasets: [{
-            label: 'Resolutions',
-            data: [<?php echo $attachments['Pending']; ?>, <?php echo $attachments['Approved']; ?>, <?php echo $attachments['Rejected']; ?>],
-            backgroundColor: ['#f39c12', '#007bff', '#dc3545']
-        }]
-    };
+    // Ordinance Pie Chart
+    new Chart(document.getElementById('ordinancePieChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [
+                    <?php echo $ordinanceCounts['Pending']; ?>, 
+                    <?php echo $ordinanceCounts['Approved']; ?>, 
+                    <?php echo $ordinanceCounts['Rejected']; ?>
+                ],
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 
-    const ctxOrdinance = document.getElementById('ordinanceChart').getContext('2d');
-    new Chart(ctxOrdinance, { type: 'bar', data: ordinanceData });
-
-    const ctxResolution = document.getElementById('resolutionChart').getContext('2d');
-    new Chart(ctxResolution, { type: 'bar', data: resolutionData });
+    // Resolution Pie Chart
+    new Chart(document.getElementById('resolutionPieChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [
+                    <?php echo $resolutionCounts['Pending']; ?>, 
+                    <?php echo $resolutionCounts['Approved']; ?>, 
+                    <?php echo $resolutionCounts['Rejected']; ?>
+                ],
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
 });
+
+
 </script>
 
 </body>

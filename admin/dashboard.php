@@ -32,6 +32,26 @@ while ($row = $department_users->fetch_assoc()) {
     $department_data[] = $row['user_count'];
 }
 
+// Fetch Ordinance & Resolution Counts for Users
+$submission_counts = $conn->query("
+    SELECT 
+        COUNT(o.id) AS ordinances_count,
+        COUNT(r.id) AS resolutions_count
+    FROM ordinances o
+    LEFT JOIN resolutions r ON r.submitted_by = o.submitted_by
+");
+
+$ordinance_count = 0;
+$resolution_count = 0;
+
+if ($row = $submission_counts->fetch_assoc()) {
+// Fetch the correct count of Ordinances and Resolutions
+$ordinance_count = $conn->query("SELECT COUNT(*) AS count FROM ordinances")->fetch_assoc()['count'];
+$resolution_count = $conn->query("SELECT COUNT(*) AS count FROM resolutions")->fetch_assoc()['count'];
+
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,8 +113,21 @@ while ($row = $department_users->fetch_assoc()) {
                         </div>
                     </div>
 
-                    <!-- Line Chart for User Departments -->
                     <div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Ordinance & Resolution Submissions</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="submissionPieChart" style="height:250px"></canvas>
+        </div>
+    </div>
+</div>
+
+
+
+                    <!-- Line Chart for User Departments -->
+                    <div class="col-md-12">
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">Users Per Department</h3>
@@ -189,6 +222,34 @@ while ($row = $department_users->fetch_assoc()) {
             maintainAspectRatio: false,
         }
     });
+
+
+
+// Pie Chart for Ordinance & Resolution Submissions
+const submissionLabels = ['Ordinances', 'Resolutions'];
+const submissionData = [<?php echo $ordinance_count; ?>, <?php echo $resolution_count; ?>];
+
+new Chart(document.getElementById('submissionPieChart'), {
+    type: 'pie',
+    data: {
+        labels: submissionLabels,
+        datasets: [{
+            data: submissionData,
+            backgroundColor: ['#007bff', '#f39c12'], // Blue for Ordinances, Orange for Resolutions
+            hoverOffset: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
 </script>
 
 </body>

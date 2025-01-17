@@ -51,8 +51,8 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
       </div>
       <div class="info">
         <a href="#" class="d-block">
-          <?= htmlspecialchars($user1['firstname']) ?> <?= htmlspecialchars($user1['lastname']) ?> 
-          <small style="color: #28a745;"><i class="fas fa-circle"></i></small>
+          <?= htmlspecialchars($user1['firstname']) ?> <?= htmlspecialchars($user1['lastname']) ?> <br>
+          <small style="color: #28a745; font-size: 11px;"><i class="fas fa-circle sm" class=""></i> online</small>
         </a>
       </div>
     </div>
