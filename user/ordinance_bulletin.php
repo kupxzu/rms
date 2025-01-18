@@ -56,7 +56,7 @@ $result = $conn->query($sql);
         <section class="content">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Approved Ordinances</h3>
+                    <h1 class="badge badge-success" style="font-size: 20px;">Approved Ordinances</h1>
                 </div>
                 <div class="card-body">
                     <table class="table table-hover">

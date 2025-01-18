@@ -15,6 +15,7 @@ SELECT
     u.username,
     u.firstname,
     u.lastname,
+    u.profile_pic,  -- Fetch profile picture
     d.name AS division_name,
     p.name AS position_name
 FROM users u
@@ -33,28 +34,32 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
+        // Use a default profile picture if none is set
+        $profilePicture = !empty($row['profile_pic']) ? '../uploads/profile_pics/' . htmlspecialchars($row['profile_pic']) : '../uploads/profile_pics/default.png';
 ?>
     <div class="dropdown-item list-group-item">
         <div class="d-flex align-items-center">
             <!-- Profile Image -->
-            <img src="profile.png" 
+            <img src="<?= $profilePicture ?>" 
                  alt="Profile Image" 
                  class="rounded-circle mr-3" 
-                 style="width:50px; height:50px;">
+                 style="width:50px; height:50px; object-fit: cover;">
+
             <!-- User Details -->
             <div class="flex-grow-1">
-                <h5 class="mb-1"><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></h5>
+                <h5 class="mb-1"><?= htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?></h5>
                 <p class="mb-1">
-                    <strong><?php echo htmlspecialchars($row['division_name'] ?? 'No Division'); ?></strong><br>
-                    <small><?php echo htmlspecialchars($row['position_name'] ?? 'No Position'); ?></small>
+                    <strong><?= htmlspecialchars($row['division_name'] ?? 'No Division'); ?></strong><br>
+                    <small><?= htmlspecialchars($row['position_name'] ?? 'No Position'); ?></small>
                 </p>
             </div>
+
             <!-- Reply Button -->
             <div class="ml-auto">
                 <button 
                     class="btn btn-primary btn-sm btn-reply" 
-                    data-username="<?php echo htmlspecialchars($row['username']); ?>"
-                    data-user-id="<?php echo htmlspecialchars($row['user_id']); ?>">
+                    data-username="<?= htmlspecialchars($row['username']); ?>"
+                    data-user-id="<?= htmlspecialchars($row['user_id']); ?>">
                     <i class="fas fa-reply"></i> Reply
                 </button>
             </div>

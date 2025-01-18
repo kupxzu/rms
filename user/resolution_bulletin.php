@@ -56,7 +56,7 @@ $result = $conn->query($sql);
         <section class="content">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Resolution</h3>
+                    <h3 class="badge badge-success" style="font-size: 20px;">Approved Resolution</h3>
                 </div>
                 <div class="card-body">
                     <table class="table table-hover">

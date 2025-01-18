@@ -10,6 +10,9 @@ include '../includes/db.php';
 $sql = "SELECT 
             users.id, 
             users.username, 
+            users.firstname, 
+            users.lastname, 
+            users.email, 
             dp.id AS id_dp, 
             d.name AS department_name, 
             p.name AS position_name 
@@ -17,7 +20,7 @@ $sql = "SELECT
         LEFT JOIN department_position dp ON users.id_dp = dp.id 
         LEFT JOIN departments d ON dp.department_id = d.id 
         LEFT JOIN positions p ON dp.position_id = p.id
-        WHERE users.active = 1"; // Only fetch active users
+        WHERE users.role != 'admin' AND users.active = 1";
 
 $result = $conn->query($sql);
 ?>
@@ -47,6 +50,8 @@ $result = $conn->query($sql);
                     </button>
 
                     <a href="user_change_password.php" class="btn btn-warning btn-sm"><i class="fas fa-key"></i> Password</a>
+
+                    <a href="archived_users.php" class="btn btn-warning btn-sm float-right"><i class="fas fa-archive"></i> Archived Users</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-hover">
@@ -60,9 +65,11 @@ $result = $conn->query($sql);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php while ($row = $result->fetch_assoc()) { ?>
+                            <?php 
+                             $counter = 1; 
+                            while ($row = $result->fetch_assoc()) { ?>
                                 <tr>
-                                    <td><?php echo $row['id']; ?></td>
+                                    <td><?php echo $counter++; ?></td>
                                     <td><?php echo $row['username']; ?></td>
                                     <td><?php echo $row['department_name'] ?: 'Unassigned'; ?></td>
                                     <td><?php echo $row['position_name'] ?: 'Unassigned'; ?></td>

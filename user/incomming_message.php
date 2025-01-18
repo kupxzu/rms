@@ -10,6 +10,8 @@ include '../includes/db.php';
 $successMessage = $_SESSION['success'] ?? null;
 $errorMessage = $_SESSION['error'] ?? null;
 unset($_SESSION['success'], $_SESSION['error']);
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +19,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ordinance Mailbox</title>
+  <title>Communication</title>
   <!-- CSS Libraries -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
@@ -49,6 +51,11 @@ unset($_SESSION['success'], $_SESSION['error']);
     font-size: 16px;  /* Adjust icon size */
     line-height: 1;  /* Aligns icon properly */
 }
+
+  .list-group-item.active-chat {
+    background-color: #007bff !important;
+    color: white !important;
+  }
 
   </style>
 </head>
@@ -165,26 +172,28 @@ unset($_SESSION['success'], $_SESSION['error']);
                   $currentUserId = $_SESSION['user_id']; // Get the current logged-in user ID
                   
                   $sql = "
-                          SELECT 
-                              u.id AS user_id,
-                              u.username,
-                              u.firstname,
-                              u.lastname,
-                              d.name AS division_name,
-                              p.name AS position_name,
-                              COUNT(CASE WHEN dm.is_read = 0 AND dm.receiver_id = $currentUserId THEN 1 END) AS unread_messages
-                          FROM users u
-                          LEFT JOIN department_position dp ON u.id_dp = dp.id
-                          LEFT JOIN departments d ON dp.department_id = d.id
-                          LEFT JOIN positions p ON dp.position_id = p.id
-                          LEFT JOIN messages_with_attachments dm 
-                              ON (dm.sender_id = u.id AND dm.receiver_id = $currentUserId) 
-                              OR (dm.receiver_id = u.id AND dm.sender_id = $currentUserId)
-                          WHERE u.id != $currentUserId
-                          AND u.role != 'admin'  -- 🛑 EXCLUDE ADMIN USERS
-                          GROUP BY u.id
-                          ORDER BY MAX(dm.sent_at) DESC;
-                          ";
+                  SELECT 
+                      u.id AS user_id,
+                      u.username,
+                      u.firstname,
+                      u.lastname,
+                      u.profile_pic,  -- Include profile picture column
+                      d.name AS division_name,
+                      p.name AS position_name,
+                      COUNT(CASE WHEN dm.is_read = 0 AND dm.receiver_id = $currentUserId THEN 1 END) AS unread_messages
+                  FROM users u
+                  LEFT JOIN department_position dp ON u.id_dp = dp.id
+                  LEFT JOIN departments d ON dp.department_id = d.id
+                  LEFT JOIN positions p ON dp.position_id = p.id
+                  LEFT JOIN messages_with_attachments dm 
+                      ON (dm.sender_id = u.id AND dm.receiver_id = $currentUserId) 
+                      OR (dm.receiver_id = u.id AND dm.sender_id = $currentUserId)
+                  WHERE u.id != $currentUserId
+                  AND u.role != 'admin'  -- 🛑 EXCLUDE ADMIN USERS
+                  GROUP BY u.id
+                  ORDER BY MAX(dm.sent_at) DESC;
+              ";
+              
                   $result = $conn->query($sql);
 
                   if ($result->num_rows > 0) {
@@ -193,8 +202,11 @@ unset($_SESSION['success'], $_SESSION['error']);
                       <div class="list-group-item">
                         <div class="d-flex align-items-center">
                           <!-- Profile Image -->
-                          <img src="profile.png" alt="Profile Image" class="rounded-circle mr-3"
-                            style="width:50px; height:50px;">
+                          <?php
+        $profilePicture = !empty($row['profile_pic']) ? '../uploads/profile_pics/' . $row['profile_pic'] : '../uploads/profile_pics/default.png';
+        ?>
+                          <img src="<?= htmlspecialchars($profilePicture) ?>" alt="Profile Image" class="rounded-circle mr-3"
+                          style="width:50px; height:50px; object-fit: cover;">
                           <!-- Content -->
                           <div class="flex-grow-1">
                             <h5 class="mb-1"><?php echo htmlspecialchars($row['firstname'] . ' ' . $row['lastname']); ?>
@@ -243,242 +255,129 @@ unset($_SESSION['success'], $_SESSION['error']);
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
   <script>
-    $(document).ready(function () {
-      // Search functionality
-      $('#search-btn').on('click', function () {
+$(document).ready(function() {
+    let currentReceiverId = null; // Tracks the currently active chat
+
+    // Search functionality
+    $('#search-btn').on('click', function() {
         const query = $('#search-bar').val().toLowerCase();
-        $('.list-group-item').each(function () {
-          const username = $(this).find('h5').text().toLowerCase();
-          const division = $(this).find('strong').text().toLowerCase();
-          if (username.includes(query) || division.includes(query)) {
-            $(this).show();
-          } else {
-            $(this).hide();
-          }
+        $('.list-group-item').each(function() {
+            const username = $(this).find('h5').text().toLowerCase();
+            const division = $(this).find('strong').text().toLowerCase();
+            $(this).toggle(username.includes(query) || division.includes(query));
         });
-      });
-
-      $(document).ready(function () {
-        let currentReceiverId = null; // Tracks the currently active chat
-
-        // Reply button functionality
-        $('.btn-reply').on('click', function () {
-          const username = $(this).data('username');
-          const userId = $(this).data('user-id');
-
-          $('#direct-chat-title').text(`Chat for: ${username}`);
-          $('#related-item-id').val(userId);
-
-          currentReceiverId = userId; // Set current active user
-          fetchMessages(userId, true); // Fetch and mark messages as seen
-          $(this).find('.badge-primary').remove(); // Remove the badge for new messages
-        });
-
-        // Fetch messages function
-        function fetchMessages(receiverId, markAsSeen = false) {
-          $.ajax({
-            url: 'fetch_messages.php',
-            method: 'GET',
-            data: { receiver_id: receiverId, mark_as_seen: markAsSeen },
-            success: function (response) {
-              const messages = JSON.parse(response);
-              const container = $('#direct-chat-messages');
-              container.empty();
-
-              if (messages.length === 0) {
-                container.append('<div class="text-center text-muted">No messages yet.</div>');
-                return;
-              }
-
-              messages.forEach((msg) => {
-                const alignClass = msg.sender === 'You' ? 'right' : '';
-                const attachmentPath = msg.attachment ? `../uploads/messages/${msg.attachment}` : null;
-                const attachmentLink = attachmentPath
-                  ? `<a href="${attachmentPath}" target="_blank" class="text-primary"><i class="fas fa-paperclip"></i> Attachment</a>`
-                  : '';
-                container.append(`
-                        <div class="direct-chat-msg ${alignClass}">
-                            <div class="direct-chat-infos clearfix">
-                                <span class="direct-chat-name ${alignClass ? 'float-right' : 'float-left'}">${msg.sender}</span>
-                                <span class="direct-chat-timestamp ${alignClass ? 'float-left' : 'float-right'}">${new Date(msg.sent_at).toLocaleString()}</span>
-                            </div>
-                            <div class="direct-chat-text">${msg.message}</div>
-                            ${attachmentLink}
-                        </div>
-                    `);
-              });
-
-              container.scrollTop(container[0].scrollHeight); // Auto-scroll to the latest message
-            },
-            error: function () {
-              console.error('Failed to fetch messages.');
-            },
-          });
-        }
-
-        // Send messages
-        $('#direct-chat-form').on('submit', function (e) {
-          e.preventDefault();
-          const formData = new FormData(this);
-
-          $.ajax({
-            url: 'send_message_with_attachment.php',
-            method: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function () {
-              if (currentReceiverId) fetchMessages(currentReceiverId); // Refresh messages after sending
-              $('#message-input').val('');
-              $('#attachment-input').val('');
-            },
-            error: function () {
-              alert('Failed to send the message.');
-            },
-          });
-        });
-
-        // Polling for new messages
-        setInterval(function () {
-          if (currentReceiverId) {
-            fetchMessages(currentReceiverId); // Fetch messages for the active user
-          } else {
-            updateUnreadBadges(); // Update unread badges for other users
-          }
-        }, 5000); // Poll every 5 seconds
-
-        // Update unread message badges
-        function updateUnreadBadges() {
-          $.ajax({
-            url: 'fetch_unread_badges.php',
-            method: 'GET',
-            success: function (response) {
-              const unreadCounts = JSON.parse(response);
-              $('.btn-reply').each(function () {
-                const userId = $(this).data('user-id');
-                const unreadCount = unreadCounts[userId] || 0;
-
-                $(this).find('.badge-primary').remove(); // Clear old badges
-                if (unreadCount > 0 && userId !== currentReceiverId) {
-                  $(this).append(`<span class="badge badge-primary">${unreadCount} New Messages</span>`);
-                }
-              });
-            },
-          });
-        }
-
-      });
     });
-  </script>
-  <script>
-    $(document).ready(function () {
-      // Live search and select user
-      $("#search-bar").on("input", function () {
+
+    // Live search and select user
+    $("#search-bar").on("input", function() {
         const query = $(this).val().trim();
         if (query.length > 0) {
-          $.ajax({
-            url: "search_users.php",
-            method: "POST",
-            data: { search: query },
-            success: function (response) {
-              $("#search-results").html(response).show();
-            },
-            error: function () {
-              $("#search-results").html('<div class="dropdown-item text-center text-muted">Error fetching results</div>').show();
-            }
-          });
+            $.post("search_users.php", { search: query }, function(response) {
+                $("#search-results").html(response).show();
+            }).fail(function() {
+                $("#search-results").html('<div class="dropdown-item text-center text-muted">Error fetching results</div>').show();
+            });
         } else {
-          $("#search-results").hide();
+            $("#search-results").hide();
         }
-      });
+    });
 
-      // Handle Reply Button Click (From Search and User List)
-      $(document).on("click", ".btn-reply", function () {
+    // Reply button functionality
+    $(document).on("click", ".btn-reply", function() {
         const username = $(this).data("username");
         const userId = $(this).data("user-id");
 
-        // Set chat title and update form fields
         $("#direct-chat-title").text(`Chat for: ${username}`);
         $("#related-item-id").val(userId);
+        currentReceiverId = userId;
 
-        // Enable message input
-        $("#message-input").prop("disabled", false);
-        $("#direct-chat-form button").prop("disabled", false);
-
-        // Fetch previous messages
-        fetchMessages(userId);
-
-        // Hide search dropdown
+        fetchMessages(userId, true);
+        $(this).find('.badge-primary').remove();
+        $("#message-input, #direct-chat-form button").prop("disabled", false);
         $("#search-results").hide();
-      });
+    });
 
-      // Function to Fetch Messages for the Selected User
-      function fetchMessages(receiverId) {
-        $.ajax({
-          url: "fetch_messages.php",
-          method: "GET",
-          data: { receiver_id: receiverId },
-          success: function (response) {
+    // Function to Fetch Messages
+    function fetchMessages(receiverId, markAsSeen = false) {
+        $.get("fetch_messages.php", { receiver_id: receiverId, mark_as_seen: markAsSeen }, function(response) {
             const messages = JSON.parse(response);
-            const container = $("#direct-chat-messages");
-            container.empty();
+            const container = $("#direct-chat-messages").empty();
 
             if (messages.length === 0) {
-              container.append('<div class="text-center text-muted">No messages yet.</div>');
-              return;
+                container.append('<div class="text-center text-muted">No messages yet.</div>');
+                return;
             }
 
             messages.forEach((msg) => {
-              const alignClass = msg.sender === "You" ? "right" : "";
-              const attachment = msg.attachment
-                ? `<a href="${msg.attachment}" target="_blank" class="text-primary"><i class="fas fa-paperclip"></i> Attachment</a>`
-                : "";
-              container.append(`
-                        <div class="direct-chat-msg ${alignClass}">
-                            <div class="direct-chat-infos clearfix">
-                                <span class="direct-chat-name ${alignClass ? "float-right" : "float-left"}">${msg.sender}</span>
-                                <span class="direct-chat-timestamp ${alignClass ? "float-left" : "float-right"}">${new Date(msg.sent_at).toLocaleString()}</span>
-                            </div>
-                            <div class="direct-chat-text">${msg.message}</div>
-                            ${attachment}
+                const alignClass = msg.sender === "You" ? "right" : "";
+                const attachment = msg.attachment
+                    ? `<a href="${msg.attachment}" target="_blank" class="text-primary"><i class="fas fa-paperclip"></i> Attachment</a>`
+                    : "";
+                container.append(`
+                    <div class="direct-chat-msg ${alignClass}">
+                        <div class="direct-chat-infos clearfix">
+                            <span class="direct-chat-name ${alignClass ? "float-right" : "float-left"}">${msg.sender}</span>
+                            <span class="direct-chat-timestamp">${new Date(msg.sent_at).toLocaleString()}</span>
                         </div>
-                    `);
+                        <div class="direct-chat-text">${msg.message}</div>
+                        ${attachment}
+                    </div>
+                `);
             });
 
             container.scrollTop(container[0].scrollHeight);
-          },
-          error: function () {
-            alert("Failed to fetch messages. Please try again.");
-          },
+        }).fail(function() {
+            console.error('Failed to fetch messages.');
         });
-      }
+    }
 
-      // Handle Message Send
-      $("#direct-chat-form").on("submit", function (e) {
+    // Handle Message Send
+    $("#direct-chat-form").submit(function(e) {
         e.preventDefault();
         const formData = new FormData(this);
         formData.append("receiver_id", $("#related-item-id").val());
 
-        $.ajax({
-          url: "send_message_with_attachment.php",
-          method: "POST",
-          data: formData,
-          contentType: false,
-          processData: false,
-          success: function () {
-            fetchMessages($("#related-item-id").val());
-            $("#message-input").val("");
-            $("#attachment-input").val("");
-          },
-          error: function () {
-            alert("Failed to send message.");
-          },
+        $.post({
+            url: "send_message_with_attachment.php",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function() {
+                fetchMessages($("#related-item-id").val());
+                $("#message-input, #attachment-input").val("");
+                resetAttachmentPreview();
+            },
+            error: function() {
+                alert("Failed to send message.");
+            }
         });
-      });
     });
-  </script>
-<script>
-$(document).ready(function() {
+
+    // Polling for new messages
+    setInterval(function() {
+        if (currentReceiverId) {
+            fetchMessages(currentReceiverId);
+        } else {
+            updateUnreadBadges();
+        }
+    }, 10000); // Poll every 5 seconds
+
+    // Update unread message badges
+    function updateUnreadBadges() {
+        $.get("fetch_unread_badges.php", function(response) {
+            const unreadCounts = JSON.parse(response);
+            $(".btn-reply").each(function() {
+                const userId = $(this).data("user-id");
+                const unreadCount = unreadCounts[userId] || 0;
+
+                $(this).find(".badge-primary").remove();
+                if (unreadCount > 0 && userId !== currentReceiverId) {
+                    $(this).append(`<span class="badge badge-primary">${unreadCount} New Messages</span>`);
+                }
+            });
+        });
+    }
+
     // Handle file selection and preview
     $("#attachment-input").change(function() {
         var file = this.files[0];
@@ -492,14 +391,11 @@ $(document).ready(function() {
                 var previewHTML = "";
 
                 if (fileType.startsWith("image/")) {
-                    // Display Image Preview
                     previewHTML = `<img src="${e.target.result}" class="img-fluid rounded shadow-sm" 
                                     style="max-width: 100px; max-height: 100px;">`;
                 } else if (fileType === "application/pdf") {
-                    // Display PDF Icon
                     previewHTML = `<i class="fas fa-file-pdf text-danger fa-2x"></i> ${file.name}`;
                 } else {
-                    // Display Generic File Icon
                     previewHTML = `<i class="fas fa-file-alt text-primary fa-2x"></i> ${file.name}`;
                 }
 
@@ -513,20 +409,19 @@ $(document).ready(function() {
     });
 
     // Clears the file preview after the form is submitted
-    document.getElementById("direct-chat-form").addEventListener("submit", function() {
-        setTimeout(function() {
-            resetAttachmentPreview();
-        }, 1000); // Delay to allow form submission before clearing
+    $("#direct-chat-form").submit(function() {
+        setTimeout(resetAttachmentPreview, 1000);
     });
 
     // Function to reset file input and remove preview
     function resetAttachmentPreview() {
-        $("#attachment-input").val("");  // Clear file input field
-        $("#file-preview").hide();       // Hide the preview section
-        $("#file-preview-content").html(""); // Clear preview content
+        $("#attachment-input").val("");
+        $("#file-preview").hide();
+        $("#file-preview-content").html("");
     }
 });
 </script>
+
 
   <script src="function/nav_function.js"></script>
 </body>
