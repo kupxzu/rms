@@ -63,6 +63,8 @@ $resolution_count = $conn->query("SELECT COUNT(*) AS count FROM resolutions")->f
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
+
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 

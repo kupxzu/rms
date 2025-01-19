@@ -73,7 +73,7 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
           </a>
         </li>
         <li class="nav-item">
-          <a href="incomming_message.php" class="nav-link">
+          <a href="u.php" class="nav-link">
             <i class="nav-icon fas fa-globe"></i>
             <p>Communication</p>
           </a>
@@ -87,13 +87,13 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a href="meeting.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-warning"></i>
                 <p>Meetings</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="or_file.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-warning"></i>
                 <p>Files</p>
               </a>
             </li>
@@ -108,13 +108,13 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a href="submit_ordinance.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-primary"></i>
                 <p>Submit Ordinance</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="submit_resolution.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-primary"></i>
                 <p>Submit Resolution</p>
               </a>
             </li>
@@ -129,13 +129,13 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a href="ordinance_bulletin.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-danger"></i>
                 <p>Ordinance Bulletin</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="resolution_bulletin.php" class="nav-link">
-                <i class="far fa-circle nav-icon"></i>
+                <i class="far fa-circle nav-icon text-danger"></i>
                 <p>Resolution Bulletin</p>
               </a>
             </li>

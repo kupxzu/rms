@@ -6,21 +6,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'] ?? null;
     $type = $_GET['type'] ?? null;
 
-    if (!$id || !$type || $type !== 'ordinance') {
+    if (!$id || !$type || !in_array($type, ['ordinance', 'resolution'])) {
         $_SESSION['error'] = "Invalid parameters provided.";
         header('Location: ../pending_ordinance.php');
         exit();
     }
 
-    $table = $type === 'ordinance' ? 'ordinances' : 'resolutions';
+    $table = ($type === 'ordinance') ? 'ordinances' : 'resolutions';
+
     $sql = "UPDATE $table SET status = 'Approved' WHERE id = ?";
     $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        $_SESSION['error'] = "Database error: " . $conn->error;
+        header('Location: ../pending_' . $type . '.php');
+        exit();
+    }
+
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = ucfirst($type) . " has been approved successfully!";
     } else {
-        $_SESSION['error'] = "Failed to approve the " . $type . ": " . $stmt->error;
+        $_SESSION['error'] = "Failed to approve the " . ucfirst($type) . ": " . $stmt->error;
     }
 
     header('Location: ../pending_' . $type . '.php');

@@ -20,6 +20,33 @@ $result = $conn->query($query);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
 </head>
+<style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 700px;
+            margin-top: 40px;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+        }
+        .btn-success {
+            width: 100%;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .form-check {
+            margin-bottom: 8px;
+        }
+    </style>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
@@ -68,9 +95,15 @@ $result = $conn->query($query);
 
                                 <div id="departments-section" class="form-group">
                                     <label>Select Departments That Can View</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" id="select-all" class="form-check-input">
+                                        <label class="form-check-label font-weight-bold">Publish to All?</label>
+                                     
+                                    </div>
+                                    <br>
                                     <?php while ($row = $result->fetch_assoc()): ?>
                                         <div class="form-check">
-                                            <input type="checkbox" name="departments[]" value="<?= $row['id'] ?>" class="form-check-input">
+                                            <input type="checkbox" name="departments[]" value="<?= $row['id'] ?>" class="form-check-input department-checkbox">
                                             <label class="form-check-label"><?= htmlspecialchars($row['name']) ?></label>
                                         </div>
                                     <?php endwhile; ?>
@@ -108,7 +141,20 @@ $(document).ready(function(){
 
     $("#file_type").change(toggleDepartments);
     toggleDepartments();
+
+    // "Select All" Functionality
+    $("#select-all").on("change", function() {
+        $(".department-checkbox").prop("checked", this.checked);
+    });
+
+    // Uncheck "Select All" if a department is manually unchecked
+    $(".department-checkbox").on("change", function() {
+        if (!this.checked) {
+            $("#select-all").prop("checked", false);
+        }
+    });
 });
+
 </script>
 
 </body>

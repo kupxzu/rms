@@ -3,7 +3,7 @@ session_start();
 include '../includes/db.php';
 
 // Fetch pending resolutions
-$sql = "SELECT resolutions.*, users.username 
+$sql = "SELECT resolutions.*, users.firstname, users.lastname 
         FROM resolutions 
         JOIN users ON resolutions.submitted_by = users.id 
         WHERE resolutions.status = 'Pending'";
@@ -86,7 +86,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                         <td><?php echo $row['id']; ?></td>
                                         <td><?php echo $row['title']; ?></td>
                                         <td><?php echo $row['description']; ?></td>
-                                        <td><?php echo $row['username']; ?></td>
+                                        <td><?php echo $row['firstname'] . ' ' . $row['lastname']; ?></td>
                                         <td><?php echo $row['submission_date']; ?></td>
                                         <td>
                                             <?php if ($row['attachment']): ?>

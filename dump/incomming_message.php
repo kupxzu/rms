@@ -84,7 +84,7 @@ unset($_SESSION['success'], $_SESSION['error']);
         <!-- Added class "push-right" to push the row slightly to the right -->
         <div class="row push-right">
           <!-- Left Column: Chat Sidebar -->
-          <div class="col-md-3">
+          <div class="col-md-4">
             <a hidden href="#" class="btn btn-primary btn-block mb-3">
               <i class="fas fa-edit"></i> Compose Ordinance
             </a>
@@ -216,7 +216,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                               <small><?php echo htmlspecialchars($row['position_name'] ?? 'No Position'); ?></small>
                             </p>
                             <?php if ($row['unread_messages'] > 0): ?>
-                              <span class="badge badge-primary"><?php echo $row['unread_messages']; ?> New Messages</span>
+                              <span hidden class="badge badge-primary"><?php echo $row['unread_messages']; ?> New Messages<span>
                             <?php endif; ?>
                           </div>
 
@@ -316,10 +316,10 @@ $(document).ready(function() {
                 container.append(`
                     <div class="direct-chat-msg ${alignClass}">
                         <div class="direct-chat-infos clearfix">
-                            <span class="direct-chat-name ${alignClass ? "float-right" : "float-left"}">${msg.sender}</span>
-                            <span class="direct-chat-timestamp">${new Date(msg.sent_at).toLocaleString()}</span>
+                            <span class="direct-chat-name ${alignClass ? "float-right" : "float-left"}">${msg.sender}: &nbsp;</span>
+                            <span class="direct-chat-timestamp" style="float: ${alignClass ? "right" : "left"}">${new Date(msg.sent_at).toLocaleString()}:&nbsp; </span>
                         </div>
-                        <div class="direct-chat-text">${msg.message}</div>
+                         <div class="direct-chat-text">${msg.message}</div>
                         ${attachment}
                     </div>
                 `);
@@ -360,7 +360,7 @@ $(document).ready(function() {
         } else {
             updateUnreadBadges();
         }
-    }, 10000); // Poll every 5 seconds
+    }, 4000); // Poll every 5 seconds
 
     // Update unread message badges
     function updateUnreadBadges() {
