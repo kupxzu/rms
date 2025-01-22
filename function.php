@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['error'] = "Username or password is incorrect.";
         }
     } else {
-        $_SESSION['error'] = "Your account is inactive, contact the admin.";
+        $_SESSION['error'] = "Login credentials don't match in our records.";
     }
 
     // Redirect back to the login page with an error message

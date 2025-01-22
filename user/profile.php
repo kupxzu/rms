@@ -5,12 +5,12 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-require '../includes/db.php'; // Ensure this connects to your database
+require '../includes/db.php';
 
 $user_id = $_SESSION['user_id'];
 
-// Fetch user details along with department and position
-$query = "SELECT u.firstname, u.lastname, u.email, u.profile_pic, 
+// Fetch user details including username
+$query = "SELECT u.firstname, u.lastname, u.email, u.username, u.profile_pic, 
                  d.name AS department, p.name AS position
           FROM users u
           LEFT JOIN department_position dp ON u.id_dp = dp.id
@@ -28,6 +28,7 @@ $full_name = htmlspecialchars($user['firstname'] . " " . $user['lastname']);
 $profile_picture = !empty($user['profile_pic']) ? "../uploads/profile_pics/" . htmlspecialchars($user['profile_pic']) : "../../dist/img/user4-128x128.jpg";
 $department = htmlspecialchars($user['department'] ?? 'N/A');
 $position = htmlspecialchars($user['position'] ?? 'N/A');
+$username = htmlspecialchars($user['username']);
 ?>
 
 <!DOCTYPE html>
@@ -41,16 +42,31 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 </head>
 <style>
-.profile-user-img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover; /* Prevents stretching and zooms in */
-    border-radius: 50%; /* Ensures a perfect circle */
-    display: block;
-    margin: 0 auto;
-}
-
-
+    .profile-user-img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+        margin: 0 auto;
+    }
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    .password-input {
+        width: 100%;
+        padding-right: 40px;
+    }
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 18px;
+        color: #666;
+    }
 </style>
 <body class="hold-transition sidebar-mini layout-fixed">
 
@@ -59,20 +75,27 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
     <?php include '../includes/user_sidebar.php'; ?>
 
     <div class="content-wrapper">
+
+    <?php if (isset($_SESSION['message'])): ?>
+    <div id="alertMessage">
+        <?= $_SESSION['message']; ?>
+    </div>
+    <?php unset($_SESSION['message']); // Remove message after displaying ?>
+<?php endif; ?>
+
+
       <section class="content">
         <div class="container-fluid">
           <div class="row">
-            <!-- Profile Section -->
             <div class="col-md-3">
               <div class="card card-primary card-outline">
                 <div class="card-body box-profile">
                   <div class="text-center">
-                  <img class="profile-user-img img-fluid img-circle"
-     src="<?= $profile_picture ?>"
-     alt="User profile picture"
-     data-toggle="modal" data-target="#profileModal"
-     style="cursor: pointer; width: 200px; height: 200px; object-fit: cover;">
-
+                    <img class="profile-user-img img-fluid img-circle"
+                         src="<?= $profile_picture ?>"
+                         alt="User profile picture"
+                         data-toggle="modal" data-target="#profileModal"
+                         style="cursor: pointer;">
                   </div>
                   <h3 class="profile-username text-center"><?= $full_name ?></h3>
                   <p class="text-muted text-center"><?= htmlspecialchars($user['email']) ?></p>
@@ -86,12 +109,12 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
               </div>
             </div>
 
-            <!-- Settings Section -->
             <div class="col-md-9">
               <div class="card">
                 <div class="card-header p-2">
                   <ul class="nav nav-pills">
                     <li class="nav-item"><a class="nav-link active" href="#settings" data-toggle="tab">Edit User</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#password" data-toggle="tab">Change Password</a></li>
                   </ul>
                 </div>
                 <div class="card-body">
@@ -112,16 +135,54 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
 
                         <div class="form-group">
                           <label for="email">Email</label>
-                          <input type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" required>
+                          <input disabled type="email" name="email" id="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-save"></i> Save Changes
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="tab-pane" id="password">
+                      <form action="function/update_password.php" method="POST">
+                        <input type="hidden" name="user_id" value="<?= $user_id ?>">
+
+                        <div class="form-group">
+                          <label for="username">Username</label>
+                          <input type="text" id="username" class="form-control" value="<?= $username ?>" readonly>
                         </div>
 
                         <div class="form-group">
-                          <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Changes
-                          </button>
+                          <label for="current_password">Current Password</label>
+                          <div class="password-wrapper">
+                            <input type="password" name="current_password" id="current_password" class="password-input form-control" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('current_password')"></i>
+                          </div>
                         </div>
+
+                        <div class="form-group">
+                          <label for="new_password">New Password</label>
+                          <div class="password-wrapper">
+                            <input type="password" name="new_password" id="new_password" class="password-input form-control" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('new_password')"></i>
+                          </div>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="confirm_password">Confirm Password</label>
+                          <div class="password-wrapper">
+                            <input type="password" name="confirm_password" id="confirm_password" class="password-input form-control" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm_password')"></i>
+                          </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-lock"></i> Update Password
+                        </button>
                       </form>
-                    </div>
+                    </div>  
                   </div>
                 </div>
               </div>
@@ -132,8 +193,9 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
     </div>
   </div>
 
-  <!-- Profile Picture Modal -->
-  <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+
+    <!-- Profile Picture Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -164,8 +226,28 @@ $position = htmlspecialchars($user['position'] ?? 'N/A');
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+  function togglePassword(fieldId) {
+    var field = document.getElementById(fieldId);
+    field.type = field.type === "password" ? "text" : "password";
+  }
+</script>
+<script>
+    // Automatically hide the alert message after 5 seconds
+    setTimeout(function() {
+        var alert = document.getElementById("alertMessage");
+        if (alert) {
+            alert.style.transition = "opacity 0.5s ease";
+            alert.style.opacity = "0";
+            setTimeout(function() {
+                alert.style.display = "none";
+            }, 500); // Additional delay for smooth fade out
+        }
+    }, 5000);
+</script>
 </body>
 </html>

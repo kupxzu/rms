@@ -3,9 +3,7 @@
 <body>
 <head> 
 
-<link rel="stylesheet" href="styles.css">
-
-
+<link rel="stylesheet" href="style.css">
 </head>
 
 
@@ -24,24 +22,33 @@
 		</form>
 	</div>
 	<div class="form-container sign-in-container">
-		<form action="function.php" method="POST">
-			<h1>Sign in</h1>
+    <form action="function.php" method="POST">
+        <h1>Sign in</h1>
 
-			<span hidden>or use your account</span>
-			<input type="text" name="username" placeholder="Username"  />
-			<input type="password" name="password" placeholder="Password" required />
+        <span hidden>or use your account</span>
+        <input type="text" name="username" placeholder="Username" required />
 
-			<?php
-            if (isset($_SESSION['error'])) {
-                echo "<div style='color: red; margin-bottom: 10px; font-size: 15px;'>" . $_SESSION['error'] . "</div>";
-                unset($_SESSION['error']); // Clear error message after displaying it
-            }
-            ?>
+        <!-- Password input with show/hide functionality (CSS only) -->
+        <div class="password-wrapper">
+            <input type="password" name="password" id="password" class="password-input" placeholder="Password" required />
+            <input type="checkbox" id="togglePassword" class="toggle-checkbox">
+            <label for="togglePassword" class="toggle-label">
+                <i class="fas fa-eye"></i>
+                <i class="fas fa-eye-slash"></i>
+            </label>
+        </div>
 
-			<a href="#" hidden	>Forgot your password?</a>
-			<button type="submit">Sign In</button>
-		</form>
-	</div>
+        <?php
+        if (isset($_SESSION['error'])) {
+            echo "<div style='color: red; margin-bottom: 10px; font-size: 15px;'>" . $_SESSION['error'] . "</div>";
+            unset($_SESSION['error']); // Clear error message after displaying it
+        }
+        ?>
+
+        <a href="#" hidden>Forgot your password?</a>
+        <button type="submit">Sign In</button>
+    </form>
+</div>
 	<div class="overlay-container">
 		<div class="overlay">
 			<div class="overlay-panel overlay-left">
@@ -59,6 +66,25 @@
 	</div>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.min.js"></script>
+
+<script>
+    document.getElementById("togglePassword").addEventListener("click", function () {
+        var passwordField = document.getElementById("password");
+        var icon = this.querySelector("i");
+
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    });
+</script>
 <script src="function.js"></script>
 
 <footer>

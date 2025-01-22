@@ -274,3 +274,45 @@ p{
 	color: #000000;
 	text-decoration: none;
 }
+
+.password-wrapper {
+	position: relative;
+	width: 100%;
+}
+
+.password-input {
+	width: 100%;
+	padding-right: 40px; /* Space for the icon */
+}
+
+.toggle-checkbox {
+	display: none;
+}
+
+.toggle-label {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	cursor: pointer;
+	font-size: 18px;
+	color: #666;
+}
+
+/* Default state: Show "eye" icon */
+.toggle-label .fa-eye-slash {
+	display: none;
+}
+
+/* When checkbox is checked: Show "eye-slash" and change input type */
+.toggle-checkbox:checked + .toggle-label .fa-eye {
+	display: none;
+}
+
+.toggle-checkbox:checked + .toggle-label .fa-eye-slash {
+	display: inline;
+}
+
+.toggle-checkbox:checked ~ .password-input {
+	font-family: monospace;
+}

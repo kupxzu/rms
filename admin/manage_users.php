@@ -155,7 +155,7 @@ $result = $conn->query($sql);
                     <!-- Contact -->
                     <div class="form-group">
                         <label for="contact">Contact</label>
-                        <input type="text" name="contact" id="contact" class="form-control" required>
+                        <input type="text" name="contact" id="contact" class="form-control" maxlength="11" required>
                         <small id="contactFeedback" class="text-danger"></small>
                     </div>
 
@@ -345,9 +345,21 @@ $(document).ready(function() {
     $("#contact").on("input", function() {
         var contact = $(this).val();
 
-        if (contact.length < 10) {
-            $("#contactFeedback").text("Contact number must be at least 10 digits.");
-            $("#submitBtn").prop("disabled", true);
+        // Ensure only numbers are entered
+        if (!/^[0-9]*$/.test(contact)) {
+            $("#contactFeedback").text("Only numbers are allowed.");
+            checkFormValidity();
+            return;
+        }
+
+        // Ensure exactly 11 digits
+        if (contact.length < 11) {
+            $("#contactFeedback").text("Contact number must be exactly 11 digits.");
+            checkFormValidity();
+            return;
+        } else if (contact.length > 11) {
+            $("#contactFeedback").text("Contact number cannot exceed 11 digits.");
+            checkFormValidity();
             return;
         }
 
@@ -359,11 +371,10 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.contact === "exists") {
                     $("#contactFeedback").text("This contact number is already in use.");
-                    $("#submitBtn").prop("disabled", true);
                 } else {
                     $("#contactFeedback").text("");
-                    $("#submitBtn").prop("disabled", false);
                 }
+                checkFormValidity();
             }
         });
     });
