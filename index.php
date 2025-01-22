@@ -59,7 +59,7 @@
 			<div class="overlay-panel overlay-right">
 				<img src="includes/www.png" alt="">
 				<h1>LGU ENRILE</h1>
-				<p>Reecord Management System</p>
+				<p>Record Management System</p>
 				<button class="ghost" id="signUp">Read More</button>
 			</div>
 		</div>
