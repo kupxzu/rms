@@ -150,7 +150,7 @@ $(document).ready(function () {
 
                     users.forEach(user => {
                         let unreadBadge = user.unread_count > 0 ? `<span class='badge badge-danger float-right'>${user.unread_count}</span>` : "";
-                        let profilePic = user.profile_pic ? `../uploads/profile_pics/${user.profile_pic}` : "https://via.placeholder.com/50";
+                        let profilePic = user.profile_pic ? `../uploads/profile_pics/${user.profile_pic}` : "profile.png";
 
                         $("#users").append(`
                             <a href="#" class='list-group-item list-group-item-action user-item' data-id='${user.id}'>

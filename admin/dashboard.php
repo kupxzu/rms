@@ -7,7 +7,7 @@ if ($_SESSION['role'] != 'admin') {
 include '../includes/db.php';
 
 // Fetch Total Users Count
-$total_users = $conn->query("SELECT COUNT(*) AS count FROM users")->fetch_assoc()['count'];
+$total_users = $conn->query("SELECT COUNT(*) AS count FROM users WHERE role != 'admin' OR (role = 'admin' AND active = 1)")->fetch_assoc()['count'];
 
 // Fetch Ordinances and Resolutions Status Counts
 $statuses = ['Pending', 'Approved', 'Rejected'];
@@ -85,23 +85,25 @@ $resolution_count = $conn->query("SELECT COUNT(*) AS count FROM resolutions")->f
         </section>
 
         <!-- Main Content -->
-        <section class="content">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-4 col-6">
-                        <div class="small-box bg-success">
-                            <div class="inner">
-                                <h3><?php echo $total_users; ?></h3>
-                                <p>Total Users</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <a href="manage_users.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                        </div>
-                    </div>
-                </div>
 
+        <section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3><?php echo $total_users; ?></h3>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <a href="manage_users.php" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
                 <!-- Pie Chart for Status -->
                 <div class="row">
                     <div class="col-md-6">

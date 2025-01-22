@@ -5,14 +5,26 @@ include '../includes/db.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Add Department
     if (isset($_POST['add_department'])) {
-        $name = $_POST['department_name'];
-        $sql = "INSERT INTO departments (name) VALUES (?)";
-        $stmt = $conn->prepare($sql);
+        $name = trim($_POST['department_name']);
+
+        // Check if department already exists
+        $check_sql = "SELECT id FROM departments WHERE name = ?";
+        $stmt = $conn->prepare($check_sql);
         $stmt->bind_param("s", $name);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Department added successfully!";
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $_SESSION['error'] = "Department already exists!";
         } else {
-            $_SESSION['error'] = "Failed to add department: " . $conn->error;
+            $sql = "INSERT INTO departments (name) VALUES (?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $name);
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Department added successfully!";
+            } else {
+                $_SESSION['error'] = "Failed to add department: " . $conn->error;
+            }
         }
         header('Location: manage_d-p.php');
         exit();
@@ -21,14 +33,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Edit Department
     if (isset($_POST['edit_department'])) {
         $id = $_POST['department_id'];
-        $name = $_POST['department_name'];
-        $sql = "UPDATE departments SET name = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
+        $name = trim($_POST['department_name']);
+
+        // Check if new name already exists (excluding current department)
+        $check_sql = "SELECT id FROM departments WHERE name = ? AND id != ?";
+        $stmt = $conn->prepare($check_sql);
         $stmt->bind_param("si", $name, $id);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Department updated successfully!";
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $_SESSION['error'] = "Department name already in use!";
         } else {
-            $_SESSION['error'] = "Failed to update department: " . $conn->error;
+            $sql = "UPDATE departments SET name = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $name, $id);
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Department updated successfully!";
+            } else {
+                $_SESSION['error'] = "Failed to update department: " . $conn->error;
+            }
         }
         header('Location: manage_d-p.php');
         exit();
@@ -51,14 +75,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Add Position
     if (isset($_POST['add_position'])) {
-        $name = $_POST['position_name'];
-        $sql = "INSERT INTO positions (name) VALUES (?)";
-        $stmt = $conn->prepare($sql);
+        $name = trim($_POST['position_name']);
+
+        // Check if position already exists
+        $check_sql = "SELECT id FROM positions WHERE name = ?";
+        $stmt = $conn->prepare($check_sql);
         $stmt->bind_param("s", $name);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Position added successfully!";
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $_SESSION['error'] = "Position already exists!";
         } else {
-            $_SESSION['error'] = "Failed to add position: " . $conn->error;
+            $sql = "INSERT INTO positions (name) VALUES (?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $name);
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Position added successfully!";
+            } else {
+                $_SESSION['error'] = "Failed to add position: " . $conn->error;
+            }
         }
         header('Location: manage_d-p.php');
         exit();
@@ -67,14 +103,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Edit Position
     if (isset($_POST['edit_position'])) {
         $id = $_POST['position_id'];
-        $name = $_POST['position_name'];
-        $sql = "UPDATE positions SET name = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
+        $name = trim($_POST['position_name']);
+
+        // Check if new name already exists (excluding current position)
+        $check_sql = "SELECT id FROM positions WHERE name = ? AND id != ?";
+        $stmt = $conn->prepare($check_sql);
         $stmt->bind_param("si", $name, $id);
-        if ($stmt->execute()) {
-            $_SESSION['success'] = "Position updated successfully!";
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $_SESSION['error'] = "Position name already in use!";
         } else {
-            $_SESSION['error'] = "Failed to update position: " . $conn->error;
+            $sql = "UPDATE positions SET name = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("si", $name, $id);
+            if ($stmt->execute()) {
+                $_SESSION['success'] = "Position updated successfully!";
+            } else {
+                $_SESSION['error'] = "Failed to update position: " . $conn->error;
+            }
         }
         header('Location: manage_d-p.php');
         exit();
