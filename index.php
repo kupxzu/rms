@@ -58,9 +58,9 @@
 			</div>
 			<div class="overlay-panel overlay-right">
 				<img src="includes/www.png" alt="">
-				<h1>LGU ENRILE</h1>
+				<h2 style="color: black;" >Local Government Unit of Enrile</h2>
 				<p>Record Management System</p>
-				<button class="ghost" id="signUp">Read More</button>
+				<button hidden class="ghost" id="signUp">Read More</button>
 			</div>
 		</div>
 	</div>

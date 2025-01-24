@@ -63,8 +63,8 @@ $result = $conn->query($sql);
                                 <tr>
                                     <th>ID</th>
                                     <th>Username</th>
-                                    <th>Department</th>
-                                    <th>Position</th>
+                                    <th>Name</th>
+                                    <th>Department & Position</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -75,8 +75,8 @@ $result = $conn->query($sql);
                                     <tr>
                                         <td><?php echo $counter++; ?></td>
                                         <td><?php echo $row['username']; ?></td>
-                                        <td><?php echo $row['department_name'] ?: 'Unassigned'; ?></td>
-                                        <td><?php echo $row['position_name'] ?: 'Unassigned'; ?></td>
+                                        <td><?php echo $row['firstname'] . ' ' . $row['lastname']; ?></td>
+                                        <td><?php echo $row['department_name'] ?: 'Unassigned'; ?> <br> <?php echo $row['position_name'] ?: 'Unassigned'; ?> </td>
                                         <td>
                                             <button class="btn btn-primary btn-sm edit-user"
                                                 data-id="<?php echo $row['id']; ?>"

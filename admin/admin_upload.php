@@ -84,7 +84,7 @@ $result = $conn->query($query);
                                 <div class="form-group">
                                     <label for="file_type">Action</label>
                                     <select name="file_type" id="file_type" class="form-control" required>
-                                        <option value="None">Post Meeting</option>
+                                        <option value="None">Schedule Meeting</option>
                                         <option value="Ordinance">Send Ordinance File</option>
                                         <option value="Resolution">Send Resolution File
                                         

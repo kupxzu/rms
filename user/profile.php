@@ -25,7 +25,7 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
 $full_name = htmlspecialchars($user['firstname'] . " " . $user['lastname']);
-$profile_picture = !empty($user['profile_pic']) ? "../uploads/profile_pics/" . htmlspecialchars($user['profile_pic']) : "../../dist/img/user4-128x128.jpg";
+$profile_picture = !empty($user['profile_pic']) ? "../uploads/profile_pics/" . htmlspecialchars($user['profile_pic']) : "profile.png";
 $department = htmlspecialchars($user['department'] ?? 'N/A');
 $position = htmlspecialchars($user['position'] ?? 'N/A');
 $username = htmlspecialchars($user['username']);

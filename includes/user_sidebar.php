@@ -72,7 +72,28 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
             <p>Events</p>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-globe"></i>
+            <p>Communication <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="ingoing.php" class="nav-link">
+                <i class="far fa-circle nav-icon text-info"></i>
+                <p>Ingoing</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="outgoing.php" class="nav-link">
+                <i class="far fa-circle nav-icon text-info"></i>
+                <p>Outgoing</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <li hidden class="nav-item">
           <a href="u.php" class="nav-link">
             <i class="nav-icon fas fa-globe"></i>
             <p>Communication</p>
@@ -88,7 +109,7 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
             <li class="nav-item">
               <a href="meeting.php" class="nav-link">
                 <i class="far fa-circle nav-icon text-warning"></i>
-                <p>Meetings</p>
+                <p>Meeting Schedule</p>
               </a>
             </li>
             <li class="nav-item">
@@ -109,13 +130,13 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
             <li class="nav-item">
               <a href="submit_ordinance.php" class="nav-link">
                 <i class="far fa-circle nav-icon text-primary"></i>
-                <p>Submit Ordinance</p>
+                <p>Request Ordinance</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="submit_resolution.php" class="nav-link">
                 <i class="far fa-circle nav-icon text-primary"></i>
-                <p>Submit Resolution</p>
+                <p>Request Resolution</p>
               </a>
             </li>
           </ul>

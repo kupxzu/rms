@@ -15,12 +15,13 @@ $start = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? trim($_GET['search']) : "";
 $filter = isset($_GET['filter']) ? trim($_GET['filter']) : "";
 
+
 // Build WHERE clause for search and filter
 $whereClause = "1=1";
 if (!empty($search)) {
     $whereClause .= " AND (title LIKE '%$search%' OR file_type LIKE '%$search%')";
 }
-if (!empty($filter) && ($filter == 'Ordinance' || $filter == 'Resolution')) {
+if (!empty($filter) && ($filter == 'Ordinance' || $filter == 'Resolution' || $filter == 'None' || $filter == 'Events')) {
     $whereClause .= " AND file_type = '$filter'";
 }
 
@@ -52,6 +53,7 @@ $result = $conn->query($query);
 <?php include 'sidebar.php'; ?>
 
 <div class="content-wrapper">
+    <br>
     <section class="content">
         <div class="container-fluid">
             <div class="row">
@@ -75,6 +77,8 @@ $result = $conn->query($query);
                                         <option value="">All Types</option>
                                         <option value="Ordinance" <?php if ($filter == 'Ordinance') echo 'selected'; ?>>Ordinance</option>
                                         <option value="Resolution" <?php if ($filter == 'Resolution') echo 'selected'; ?>>Resolution</option>
+                                        <option value="Events" <?php if ($filter == 'Events') echo 'selected'; ?>>Events</option>
+                                        <option value="None" <?php if ($filter == 'None') echo 'selected'; ?>>Meeting</option>
                                     </select>
                                 </div>
                             </form>
