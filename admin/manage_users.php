@@ -191,96 +191,98 @@ $result = $conn->query($sql);
 </div>
 
 
-    <!-- Edit User Modal -->
-    <div class="modal fade" id="editUserModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <form action="function/edit_user.php" method="POST">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Edit User</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" id="edit_user_id">
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="function/edit_user.php" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="user_id" id="edit_user_id">
 
-                        <div class="row">
-                            <!-- First Name -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit_firstname">First Name</label>
-                                    <input type="text" name="firstname" id="edit_firstname" class="form-control"
-                                        required>
-                                </div>
-                            </div>
-                            <!-- Last Name -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="edit_lastname">Last Name</label>
-                                    <input type="text" name="lastname" id="edit_lastname" class="form-control" required>
-                                </div>
+                    <div class="row">
+                        <!-- First Name -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit_firstname">First Name</label>
+                                <input type="text" name="firstname" id="edit_firstname" class="form-control" required>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <!-- Age -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="edit_age">Age</label>
-                                    <input type="number" name="age" id="edit_age" class="form-control" min="1" required>
-                                </div>
+                        <!-- Last Name -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="edit_lastname">Last Name</label>
+                                <input type="text" name="lastname" id="edit_lastname" class="form-control" required>
                             </div>
-                            <!-- Sex -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="edit_sex">Sex</label>
-                                    <select name="sex" id="edit_sex" class="form-control" required>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <!-- Contact -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="edit_contact">Contact</label>
-                                    <input type="text" name="contact" id="edit_contact" class="form-control" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label for="edit_email">Email</label>
-                            <input type="email" name="email" id="edit_email" class="form-control" required>
-                        </div>
-
-                        <!-- Department -->
-                        <div class="form-group">
-                            <label for="department">Department</label>
-                            <select name="department" id="department" class="form-control" required>
-                                <option value="">Select Department</option>
-                                <?php
-                                $departments = $conn->query("SELECT * FROM departments");
-                                while ($department = $departments->fetch_assoc()) {
-                                    echo "<option value='{$department['id']}'>{$department['name']}</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="position">Position</label>
-                            <select name="id_dp" id="position" class="form-control" required>
-                                <option value="">Select Position</option>
-                            </select>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="submit" name="edit_user" class="btn btn-success">Save Changes</button>
                         </div>
                     </div>
-            </form>
-        </div>
+
+                    <div class="row">
+                        <!-- Age -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="edit_age">Age</label>
+                                <input type="number" name="age" id="edit_age" class="form-control" min="1" required>
+                            </div>
+                        </div>
+                        <!-- Sex -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="edit_sex">Sex</label>
+                                <select name="sex" id="edit_sex" class="form-control" required>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Contact -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="edit_contact">Contact</label>
+                                <input type="text" name="contact" id="edit_contact" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="edit_email">Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control" required>
+                    </div>
+
+                    <!-- Department -->
+                    <div class="form-group">
+                        <label for="edit_department">Department</label>
+                        <select name="department" id="edit_department" class="form-control" required>
+                            <option value="">Select Department</option>
+                            <?php
+                            $departments = $conn->query("SELECT * FROM departments");
+                            while ($department = $departments->fetch_assoc()) {
+                                echo "<option value='{$department['id']}'>{$department['name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+<!-- Position -->
+<div class="form-group">
+    <label for="edit_position">Position</label>
+    <select name="id_dp" id="edit_position" class="form-control" required>
+        <option value="">Select Position</option>
+        <!-- Options will be dynamically loaded -->
+    </select>
+</div>
+
+                <div class="modal-footer">
+                    <button type="submit" name="edit_user" class="btn btn-success">Save Changes</button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script>

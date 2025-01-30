@@ -59,7 +59,9 @@
 			<div class="overlay-panel overlay-right">
 				<img src="includes/www.png" alt="">
 				<h2 style="color: black;" >Local Government Unit of Enrile</h2>
-				<p>Record Management System</p>
+				<p>Record Management System <br>
+                <a href="official.php">........</a></p>
+             
 				<button hidden class="ghost" id="signUp">Read More</button>
 			</div>
 		</div>

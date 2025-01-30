@@ -9,7 +9,7 @@ require '../includes/db.php'; // Ensure this file connects to your database
 
 $user_id = $_SESSION['user_id'];
 
-$query = "SELECT id, title, description, submission_date, send_attachment, status 
+$query = "SELECT id, title, description, submission_date, attachment, status 
           FROM resolutions 
           WHERE submitted_by = ? AND status = 'Pending' 
           ORDER BY submission_date DESC";

@@ -1,8 +1,8 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
+  header('Location: ../index.php');
+  exit();
 }
 
 require '../includes/db.php'; 
@@ -78,13 +78,15 @@ $result = $stmt->get_result();
                         </tr>
                       </thead>
                       <tbody>
-                        <?php while ($row = $result->fetch_assoc()): ?>
+                        <?php while ($row = $result->fetch_assoc()): 
+                              $file_path = str_replace("../", "", $row['file_path']); // Fix file path issue
+                        ?>
                           <tr>
                             <td><?= htmlspecialchars($row['title']) ?></td>
                             <td><?= nl2br(htmlspecialchars($row['description'])) ?></td>
                             <td><?= date("F d, Y", strtotime($row['uploaded_at'])) ?></td>
                             <td>
-                              <a href="../uploads/files/<?= htmlspecialchars($row['file_path']) ?>" target="_blank" 
+                              <a href="/<?= $file_path = htmlspecialchars($row['file_path']); ?>" target="_blank" 
                                  class="btn btn-sm <?= ($row['viewed'] > 0) ? 'btn-secondary' : 'btn-info' ?> view-file"
                                  data-file-id="<?= $row['id'] ?>">
                                 <i class="fas fa-eye"></i> <?= ($row['viewed'] > 0) ? 'Viewed' : 'View File' ?>
@@ -110,7 +112,6 @@ $result = $stmt->get_result();
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
   <script src="function/nav_function.js"></script>
-
 
   <script>
     $(document).ready(function(){

@@ -206,16 +206,16 @@ $username = htmlspecialchars($user['username']);
         </div>
         <div class="modal-body text-center">
           <!-- Display Current Profile Picture -->
-          <img src="<?= $profile_picture ?>" class="img-fluid rounded-circle mb-3"  style="cursor: pointer; width: 200px; height: 200px; object-fit: cover;">
+          <img src="<?= $profile_picture ?>" class="img-fluid rounded-border mb-3"  style="border-radius: 4%; cursor: pointer; width: 200px; height: 200px; object-fit: cover;">
 
           <!-- Change Profile Picture Form -->
           <form action="function/update_profile_pic.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="user_id" value="<?= $user_id ?>">
             <div class="form-group">
-              <label for="new_profile_pic">Select New Profile Picture</label>
-              
-              <input type="file" name="new_profile_pic" id="new_profile_pic" class="form-control-file" accept=".jpg,.jpeg,.png" required>
-
+              <div class="custom-file">
+              <label class="custom-file-label" for="new_profile_pic">Select New Profile Picture</label>
+              <input type="file" name="new_profile_pic" id="new_profile_pic" class="custom-file-input" accept=".jpg,.jpeg,.png" required>
+              </div>
               <br>
               <small class="form-text text-muted">Allowed formats: JPG, PNG (Max 2MB)</small>
             </div>

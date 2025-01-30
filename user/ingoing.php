@@ -16,9 +16,9 @@ $user_id = $_SESSION['user_id'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+ <style>
         body {
             background-color: #f4f6f9;
         }
@@ -63,7 +63,10 @@ $user_id = $_SESSION['user_id'];
                                 <div class="col-md-7">
                                     <div class="card">
                                         <div class="card-header bg-success text-white">
-                                            <h5>Upload File to: <span id="upload-to">Select a user</span></h5>
+                                            <h5>                                            <button class="btn btn-info btn-sm ml-2" data-toggle="modal" data-target="#infoModal">
+        <i class="fas fa-info-circle"></i>
+    </button> Upload File to: <span id="upload-to">Select a user</span></h5>
+
                                         </div>
                                         <div class="card-body d-flex flex-column">
                                             <form id="upload-form" action="function/upload_file.php" method="POST" enctype="multipart/form-data">
@@ -146,11 +149,33 @@ $user_id = $_SESSION['user_id'];
     </div>
 </div>
 
+
+<!-- Info Modal -->
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel"><i class="fas fa-info-circle"></i> Important Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>The file must be signed by the Mayor or the Vice Mayor before uploading.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
- 
+  
 <script>
 $(document).ready(function() {
     $(".user-item").click(function() {
@@ -213,6 +238,26 @@ $(document).ready(function() {
             }
         });
     });
+});
+
+$(document).ready(function () {
+  // Get the current URL
+  const currentUrl = window.location.href;
+
+  // Find all links in the sidebar
+  $('.nav-link').each(function () {
+    const link = $(this).attr('href');
+
+    // Check if the current URL matches the link
+    if (currentUrl.includes(link)) {
+      // Add 'active' class to the clicked link
+      $(this).addClass('active');
+
+      // If it's inside a dropdown, ensure the dropdown is open
+      $(this).closest('.has-treeview').addClass('menu-open');
+      $(this).closest('.has-treeview').children('a').addClass('active');
+    }
+  });
 });
 
 

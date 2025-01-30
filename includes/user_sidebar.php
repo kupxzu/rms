@@ -72,26 +72,25 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
             <p>Events</p>
           </a>
         </li>
-        <li class="nav-item has-treeview">
-          <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-globe"></i>
-            <p>Communication <i class="right fas fa-angle-left"></i></p>
+        <li class="nav-item">
+          <a href="memorandum.php" class="nav-link">
+            <i class="nav-icon fas fa-file-text"></i>
+            <p>Memorandums</p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="ingoing.php" class="nav-link">
-                <i class="far fa-circle nav-icon text-info"></i>
-                <p>Ingoing</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="outgoing.php" class="nav-link">
-                <i class="far fa-circle nav-icon text-info"></i>
-                <p>Outgoing</p>
-              </a>
-            </li>
-          </ul>
         </li>
+        <li class="nav-item">
+          <a href="ingoing.php" class="nav-link">
+            <i class="nav-icon fas fa-comments"></i>
+            <p>Request File</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="u.php" class="nav-link">
+            <i class="nav-icon fas fa-globe"></i>
+            <p>Communicaton</p>
+          </a>
+        </li>
+
 
         <li hidden class="nav-item">
           <a href="u.php" class="nav-link">
@@ -137,6 +136,12 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
               <a href="submit_resolution.php" class="nav-link">
                 <i class="far fa-circle nav-icon text-primary"></i>
                 <p>Request Resolution</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="upload_pf.php" class="nav-link">
+                <i class="far fa-circle nav-icon text-danger"></i>
+                <p>Upload Privite File</p>
               </a>
             </li>
           </ul>

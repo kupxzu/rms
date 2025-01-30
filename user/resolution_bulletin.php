@@ -8,7 +8,7 @@ $sql = "
     SELECT 
         o.id, 
         o.title,
-        o.send_attachment as attachment,
+        o.attachment,
         o.submission_date,
         MAX(CASE WHEN dv.action = 'view' THEN 1 ELSE 0 END) AS viewed,
         MAX(CASE WHEN dv.action = 'download' THEN 1 ELSE 0 END) AS downloaded

@@ -65,7 +65,7 @@ $result = $stmt->get_result();
                             <td><?= nl2br(htmlspecialchars($row['description'])) ?></td>
                             <td><?= date("F d, Y", strtotime($row['uploaded_at'])) ?></td>
                             <td>
-                              <a href="../uploads/files/<?= htmlspecialchars($row['file_path']) ?>" target="_blank" 
+                            <a href="/<?= $file_path = htmlspecialchars($row['file_path']); ?>" target="_blank" 
                                  class="btn btn-sm <?= ($row['viewed'] > 0) ? 'btn-secondary' : 'btn-info' ?> view-file"
                                  data-file-id="<?= $row['id'] ?>">
                                 <i class="fas fa-eye"></i> <?= ($row['viewed'] > 0) ? 'Viewed' : 'View File' ?>
