@@ -145,9 +145,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         sendEmailWithAttachment($email, $uploaderName, $title, $description, $file_type, $departmentNames, "../" . $updated_file_path);
     }
 
-    $_SESSION['success'] = "File updated successfully!";
-    header("Location: admin_upload.php");
+    $_SESSION['success'] = "File has been successfully updated!";
+    header("Location: view_upload.php");
     exit();
+    
 }
 
 /**
@@ -177,11 +178,10 @@ function sendEmailWithAttachment($recipientEmail, $uploaderName, $title, $descri
         $mail->Subject = "Updated File: " . $title;
         $mail->Body = "
             <h3>A file has been updated.</h3>
-            <p><strong>Uploader:</strong> $uploaderName</p>
-            <p><strong>Title:</strong> $title</p>
-            <p><strong>Description:</strong> $description</p>
-            <p hidden><strong hidden>File Type:</strong> $file_type</p>
-            <p hidden><strong hidden>Departments:</strong> " . implode(', ', $departmentNames) . "</p>
+            <p><h2>$uploaderName</h2></p>
+            <p><h3>$title</h3></p>
+            <p><strong></strong> $description</p>
+            <p><strong>,</strong> $file_type</p>
             <p><strong>Download File:</strong> <a href='http://localhost/RMS/uploads/files/" . basename($filePath) . "'>Click Here</a></p>
         ";
 

@@ -175,13 +175,12 @@ function sendEmailWithAttachment($recipientEmail, $uploaderName, $title, $descri
 
         // Email Content
         $mail->isHTML(true);
-        $mail->Subject = "New File Uploaded: " . $title;
+        $mail->Subject = "LGU Enrile: " . $title;
         $mail->Body = "
-            <h3>A new file has been uploaded.</h3>
-            <p><strong>Uploader: LGU Enrile</strong> $uploaderName</p>
-            <p><strong>Title:</strong> $title</p>
-            <p><strong>Description:</strong> $description</p>
-            <p><strong>File Type:</strong> $file_type</p>
+            <p><h2>$uploaderName</h2></p>
+            <p><h3>$title</h3></p>
+            <p><strong></strong> $description</p>
+            <p><strong>,</strong> $file_type</p>
         ";
 
         // Send email

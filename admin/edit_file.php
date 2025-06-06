@@ -107,6 +107,32 @@ while ($row = $perm_result->fetch_assoc()) {
         </div>
     </section>
 </div>
+<!-- Full-Screen Non-bypassable Loading Modal -->
+<div id="loadingModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                <h5 class="mt-3">Uploading... Please wait</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">File updated successfully!</h5>
+                <button type="button" class="btn btn-primary mt-3" id="successRedirect">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -127,6 +153,33 @@ $(document).ready(function(){
     toggleDepartments();
 });
 </script>
+<script>
+$(document).ready(function(){
+    $("form").submit(function(event){
+        // Show the loading modal before submitting
+        $("#loadingModal").modal('show');
+
+        // Disable form submission button to prevent multiple clicks
+        $("button[type='submit']").prop("disabled", true);
+        
+        // Prevent users from closing the modal
+        $("#loadingModal").modal({backdrop: 'static', keyboard: false});
+    });
+
+    function toggleDepartments() {
+        let fileType = $("#file_type").val();
+        if (fileType === "Events") {
+            $("#departments-section").hide();
+        } else {
+            $("#departments-section").show();
+        }
+    }
+
+    $("#file_type").change(toggleDepartments);
+    toggleDepartments();
+});
+</script>
+
 
 </body>
 </html>

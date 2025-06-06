@@ -49,3 +49,6 @@ $(document).ready(function(){
 
     setInterval(updateNotificationCounts, 10000); // Refresh every 10 seconds
 });
+
+
+

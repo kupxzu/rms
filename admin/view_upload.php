@@ -142,9 +142,39 @@ $result = $conn->query($query);
         </div>
     </section>
 </div>
+<!-- Success Modal -->
+<div id="successModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-center p-4">
+            <div class="modal-body">
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <strong id="successMessage"></strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    // Check if session success message exists
+    <?php if (isset($_SESSION['success'])): ?>
+        $("#successMessage").text("<?= $_SESSION['success'] ?>");
+        $("#successModal").modal("show");
+
+        // Auto-hide modal after 3 seconds
+        setTimeout(function() {
+            $("#successModal").modal("hide");
+        }, 3000);
+
+        <?php unset($_SESSION['success']); // Clear message after showing ?>
+    <?php endif; ?>
+});
+</script>
+
 </body>
 </html>

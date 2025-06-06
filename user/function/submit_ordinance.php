@@ -4,7 +4,7 @@ include '../../includes/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['error'] = "Invalid request.";
-    header('Location: ../submit_ordinance.php');
+    header('Location: ../ordinance.php');
     exit();
 }
 
@@ -14,7 +14,7 @@ $user_id = $_SESSION['user_id'];
 
 if (!$title || !$description) {
     $_SESSION['error'] = "All fields are required.";
-    header('Location: ../submit_ordinance.php');
+    header('Location: ../ordinance.php');
     exit();
 }
 
@@ -33,7 +33,7 @@ if (!empty($_FILES['attachment']['name'])) {
         $attachment = $file_name;
     } else {
         $_SESSION['error'] = "Failed to upload the attachment.";
-        header('Location: ../submit_ordinance.php');
+        header('Location: ../ordinance.php');
         exit();
     }
 }

@@ -99,46 +99,57 @@ $user_id = $_SESSION['user_id'];
 
                                 <!-- User List (Now on the Right) -->
                                 <div class="col-md-5">
-                                    <div class="card">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="card-title">Select Departments</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <input type="text" id="search-bar" class="form-control mb-2" placeholder="Search users..."> <br>
-                                            <div id="users" class="list-group" style="max-height: 400px; overflow-y: auto;">
-                                                <?php
-                                                include '../includes/db.php';
-                                                $user_id = $_SESSION['user_id'];
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title">Select Departments</h5>
+        </div>
+        <div class="card-body">
+            <input type="text" id="search-bar" class="form-control mb-2" placeholder="Search users..."> <br>
+            <div id="users" class="list-group" style="max-height: 400px; overflow-y: auto;">
+                <?php
+                include '../includes/db.php';
+                $user_id = $_SESSION['user_id'];
 
-                                                $sql = "SELECT 
-                                                            users.id, 
-                                                            users.firstname, 
-                                                            users.lastname, 
-                                                            users.id_dp, 
-                                                            positions.name AS position_name, 
-                                                            departments.name AS department_name
-                                                        FROM users
-                                                        JOIN department_position ON users.id_dp = department_position.id
-                                                        JOIN positions ON department_position.position_id = positions.id
-                                                        JOIN departments ON department_position.department_id = departments.id
-                                                        WHERE users.id != ?";
-
-                                                $stmt = $conn->prepare($sql);
-                                                $stmt->bind_param("i", $user_id);
-                                                $stmt->execute();
-                                                $result = $stmt->get_result();
-
-                                                while ($user = $result->fetch_assoc()) {
-                                                    echo "<button class='list-group-item list-group-item-action user-item' data-id='{$user['id']}'>
-                                                            <strong>{$user['firstname']} {$user['lastname']}</strong> 
-                                                            <br><small>{$user['department_name']} <br> {$user['position_name']}</small>
-                                                          </button>";
-                                                }
-                                                ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                $sql = "SELECT 
+                users.id, 
+                users.firstname, 
+                users.lastname, 
+                users.id_dp, 
+                positions.name AS position_name, 
+                departments.name AS department_name,
+                (SELECT COUNT(*) FROM ingoing 
+                 WHERE ingoing.recipient_id = ?  -- ✅ Show unread messages only for the recipient
+                 AND ingoing.user_id = users.id 
+                 AND ingoing.is_read = 0) AS unread_files
+            FROM users
+            JOIN department_position ON users.id_dp = department_position.id
+            JOIN positions ON department_position.position_id = positions.id
+            JOIN departments ON department_position.department_id = departments.id
+            WHERE users.id != ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $user_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($user = $result->fetch_assoc()) {
+        $unreadBadge = ($user['unread_files'] > 0) ? "<span class='badge badge-danger ml-2'>{$user['unread_files']}</span>" : "";
+    
+        echo "<button class='list-group-item list-group-item-action user-item d-flex justify-content-between' data-id='{$user['id']}'>
+                <div>
+                    <strong>{$user['firstname']} {$user['lastname']}</strong>
+                    <br><small>{$user['department_name']} <br> {$user['position_name']}</small>
+                </div>
+                {$unreadBadge}
+              </button>";
+    }
+    
+    
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
 
                             </div> <!-- End Row -->
                         </div> <!-- End Main Card -->
@@ -176,8 +187,8 @@ $user_id = $_SESSION['user_id'];
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
   
-<script>
-$(document).ready(function() {
+  <script>
+    // Click event for selecting a user
     $(".user-item").click(function() {
         let userId = $(this).attr("data-id");
 
@@ -192,6 +203,17 @@ $(document).ready(function() {
         $("#upload-btn").prop("disabled", false);
 
         console.log("Selected user ID:", userId);
+
+        // ✅ Mark messages as read when the recipient clicks on a sender
+        $.ajax({
+            url: "function/mark_messages_read.php",
+            type: "POST",
+            data: { user_id: userId },
+            success: function(response) {
+                console.log("Marked messages as read for user:", userId);
+                checkUnreadNotifications(); // Refresh unread counts
+            }
+        });
 
         // Fetch uploaded files via AJAX
         $.ajax({
@@ -238,29 +260,71 @@ $(document).ready(function() {
             }
         });
     });
-});
 
-$(document).ready(function () {
-  // Get the current URL
-  const currentUrl = window.location.href;
+    // ✅ Check unread notifications dynamically every 5 seconds
+    function checkUnreadNotifications() {
+        $.ajax({
+            url: "function/get_unread_notifications.php",
+            type: "GET",
+            dataType: "json",
+            success: function(response) {
+                $(".user-item").each(function () {
+                    let userId = $(this).attr("data-id");
+                    let unreadCount = response[userId] || 0;
 
-  // Find all links in the sidebar
-  $('.nav-link').each(function () {
-    const link = $(this).attr('href');
-
-    // Check if the current URL matches the link
-    if (currentUrl.includes(link)) {
-      // Add 'active' class to the clicked link
-      $(this).addClass('active');
-
-      // If it's inside a dropdown, ensure the dropdown is open
-      $(this).closest('.has-treeview').addClass('menu-open');
-      $(this).closest('.has-treeview').children('a').addClass('active');
+                    let badgeElement = $(this).find(".badge-danger");
+                    if (unreadCount > 0) {
+                        if (badgeElement.length) {
+                            badgeElement.text(unreadCount);
+                        } else {
+                            $(this).append(`<span class='badge badge-danger ml-2'>${unreadCount}</span>`);
+                        }
+                    } else {
+                        badgeElement.remove();
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", error);
+            }
+        });
     }
-  });
-});
+
+    // Run unread notification check every 5 seconds
+    setInterval(checkUnreadNotifications, 5000);
 
 
+    // ✅ Highlight active sidebar links
+    const currentUrl = window.location.href;
+    $('.nav-link').each(function () {
+        const link = $(this).attr('href');
+        if (currentUrl.includes(link)) {
+            $(this).addClass('active');
+            $(this).closest('.has-treeview').addClass('menu-open');
+            $(this).closest('.has-treeview').children('a').addClass('active');
+        }
+    });
+</script>
+<script>
+function checkUnreadMessages() {
+    $.ajax({
+        url: "get_unread_messages.php",
+        type: "GET",
+        success: function(response) {
+            let data = JSON.parse(response);
+            let unreadCount = data.unread_count;
+
+            if (unreadCount > 0) {
+                $(".badge-danger").text(unreadCount).show();
+            } else {
+                $(".badge-danger").hide();
+            }
+        }
+    });
+}
+
+// Refresh unread messages count every 5 seconds
+setInterval(checkUnreadMessages, 5000);
 </script>
 </body>
 </html>

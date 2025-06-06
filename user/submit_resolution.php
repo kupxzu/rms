@@ -29,6 +29,8 @@ $result = $stmt->get_result();
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 -->
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 
@@ -145,6 +147,20 @@ $result = $stmt->get_result();
     $(document).on('change', '.custom-file-input', function (e) {
       var fileName = e.target.files[0].name;
       $(this).next('.custom-file-label').html(fileName);
+    });
+  </script>
+    <script>
+    $(document).ready(function () {
+      <?php if (isset($_SESSION['success'])): ?>
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: '<?= $_SESSION['success'] ?>',
+          showConfirmButton: false,
+          timer: 2500
+        });
+        <?php unset($_SESSION['success']); ?>
+      <?php endif; ?>
     });
   </script>
 </body>

@@ -238,5 +238,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </script>
 
+
+<script>
+function checkUnreadMessages() {
+    $.ajax({
+        url: "get_unread_messages.php",
+        type: "GET",
+        success: function(response) {
+            let data = JSON.parse(response);
+            let unreadCount = data.unread_count;
+
+            if (unreadCount > 0) {
+                $(".badge-danger").text(unreadCount).show();
+            } else {
+                $(".badge-danger").hide();
+            }
+        }
+    });
+}
+
+// Refresh unread messages count every 5 seconds
+setInterval(checkUnreadMessages, 5000);
+</script>
+
 </body>
 </html>

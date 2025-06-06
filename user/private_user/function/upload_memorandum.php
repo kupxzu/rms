@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description = $_POST['description'];
 
     $allowed_extensions = ['pdf', 'docx', 'jpg', 'jpeg', 'png'];
-    $upload_dir = '../../../uploads/memorandums/';
+    $upload_dir = '../../../../RMS/uploads/memorandums/';
 
     if (!empty($_FILES['file']['name'])) {
         $file_name = $_FILES['file']['name'];

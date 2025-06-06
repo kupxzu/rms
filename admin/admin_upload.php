@@ -46,7 +46,7 @@ $result = $conn->query($query);
         .form-check {
             margin-bottom: 8px;
         }
-    </style>
+</style>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
@@ -70,7 +70,7 @@ $result = $conn->query($query);
                                 <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
                             <?php endif; ?>
                             
-                            <form action="upload_file.php" method="POST" enctype="multipart/form-data">
+                            <form action="upload_file.php" method="POST" enctype="multipart/form-data" id="upload-form">
                                 <div class="form-group">
                                     <label for="title">Title</label>
                                     <input type="text" name="title" id="title" class="form-control" required>
@@ -86,9 +86,7 @@ $result = $conn->query($query);
                                     <select name="file_type" id="file_type" class="form-control" required>
                                         <option value="None">Schedule Meeting</option>
                                         <option value="Ordinance">Send Ordinance File</option>
-                                        <option value="Resolution">Send Resolution File
-                                        
-                                        </option>
+                                        <option value="Resolution">Send Resolution File</option>
                                         <option value="Events">Events (All Departments)</option>
                                     </select>
                                 </div>
@@ -98,7 +96,6 @@ $result = $conn->query($query);
                                     <div class="form-check">
                                         <input type="checkbox" id="select-all" class="form-check-input">
                                         <label class="form-check-label font-weight-bold">Publish to All?</label>
-                                     
                                     </div>
                                     <br>
                                     <?php while ($row = $result->fetch_assoc()): ?>
@@ -124,6 +121,18 @@ $result = $conn->query($query);
     </section>
 </div>
 
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <i class="fas fa-spinner fa-spin fa-3x text-primary"></i>
+        <h4>Uploading... Please wait.</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
@@ -147,11 +156,15 @@ $(document).ready(function(){
         $(".department-checkbox").prop("checked", this.checked);
     });
 
-    // Uncheck "Select All" if a department is manually unchecked
     $(".department-checkbox").on("change", function() {
         if (!this.checked) {
             $("#select-all").prop("checked", false);
         }
+    });
+
+    // Show loading modal on form submit
+    $("#upload-form").on("submit", function() {
+        $("#loadingModal").modal({backdrop: 'static', keyboard: false});
     });
 });
 

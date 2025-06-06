@@ -1,7 +1,6 @@
 <?php
 require '../includes/db.php'; // Ensure this connects to your database
-
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'] ?? 0; // Ensure user ID exists
 
 // Fetch user details along with department and position
 $query1 = "SELECT u.firstname, u.lastname, u.email, u.profile_pic, 
@@ -18,10 +17,25 @@ $stmt1->execute();
 $result1 = $stmt1->get_result();
 $user1 = $result1->fetch_assoc();
 
+// Define profile picture with a fallback
 $full_name = htmlspecialchars($user1['firstname'] . " " . $user1['lastname']);
 $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . htmlspecialchars($user1['profile_pic']) : "../../dist/img/user4-128x128.jpg";
-?>
 
+// ✅ Fetch unread messages count
+$unreadCount = 0; // Default value to prevent undefined variable issues
+$queryUnread = "SELECT COUNT(*) AS unread_count FROM messages_with_attachments WHERE receiver_id = ? AND is_read = 0";
+$stmtUnread = $conn->prepare($queryUnread);
+if ($stmtUnread) {
+    $stmtUnread->bind_param("i", $user_id);
+    $stmtUnread->execute();
+    $resultUnread = $stmtUnread->get_result();
+    if ($resultUnread) {
+        $unreadData = $resultUnread->fetch_assoc();
+        $unreadCount = $unreadData['unread_count'] ?? 0; // Ensure count is valid
+    }
+    $stmtUnread->close();
+}
+?>
 <style>
 .profile-user-img {
     width: 200px;
@@ -85,19 +99,17 @@ $profile_picture = !empty($user1['profile_pic']) ? "../uploads/profile_pics/" . 
           </a>
         </li>
         <li class="nav-item">
-          <a href="u.php" class="nav-link">
-            <i class="nav-icon fas fa-globe"></i>
-            <p>Communicaton</p>
-          </a>
-        </li>
+    <a href="u.php" class="nav-link">
+        <i class="nav-icon fas fa-globe"></i>
+        <p>
+            Communication
+            <?php if ($unreadCount > 0): ?>
+                <span class="badge badge-danger"><?= $unreadCount ?></span>
+            <?php endif; ?>
+        </p>
+    </a>
+</li>
 
-
-        <li hidden class="nav-item">
-          <a href="u.php" class="nav-link">
-            <i class="nav-icon fas fa-globe"></i>
-            <p>Communication</p>
-          </a>
-        </li>
 
         <li class="nav-item has-treeview">
           <a href="#" class="nav-link">

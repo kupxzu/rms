@@ -45,7 +45,8 @@
 
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="dashboard.php" class="brand-link text-center">
+        <a href="dashboard.php" style="
+        background-color: rgb(44, 48, 73); text-decoration: none;" class="brand-link text-center">
             <span class="brand-text font-weight-light">LGU Enrile <?= htmlspecialchars($user1['position'] ?? 'Admin') ?> </span>
         </a>
         <div class="sidebar">
@@ -69,6 +70,12 @@
                         <a href="memorandum.php" class="nav-link">
                             <i class="nav-icon fas fa-folder"></i>
                             <p>Memorandum</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="view_memo.php" class="nav-link">
+                            <i class="nav-icon fas fa-folder"></i>
+                            <p>View Memorandums</p>
                         </a>
                     </li>
                     <li class="nav-item">

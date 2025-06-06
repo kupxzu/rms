@@ -18,6 +18,7 @@ $user_id = $_SESSION['user_id'];
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert2 -->
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -41,25 +42,26 @@ $user_id = $_SESSION['user_id'];
     <div class="container-fluid">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Upload Private File</h3>
+                <h3 class="card-title">Upload Private File &nbsp <a href="upload_pf.php" class="fas fa-cycle"><i class="fas fa-sync-alt"></i></a></h3>
             </div>
             <div class="card-body">
-                <form action="upload_private_file.php" method="POST" enctype="multipart/form-data" onsubmit="showInfoModal(event)">
-                    <div class="form-group">
-                        <label for="title">Title</label>
-                        <input type="text" name="title" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea name="description" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="custom-file">
-                        <input type="file" name="file" class="custom-file-input" required>
-                        <label class="custom-file-label" for="file">Choose File (PDF, Image, DOCX)</label>
-                    </div>
-                    <br><br>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload</button>
-                </form>
+            <form id="uploadForm" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea name="description" class="form-control" rows="3"></textarea>
+    </div>
+    <div class="custom-file">
+        <input type="file" name="file" class="custom-file-input" required>
+        <label class="custom-file-label" for="file">Choose File (PDF, Image, DOCX)</label>
+    </div>
+    <br><br>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-upload"></i> Upload</button>
+</form>
+
             </div>
         </div>
     </div>
@@ -173,6 +175,58 @@ $user_id = $_SESSION['user_id'];
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
   <script src="function/nav_function.js"></script>
   <script>
+$(document).ready(function() {
+    $("#uploadForm").submit(function(event) {
+        event.preventDefault(); // Prevent page reload
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: "upload_private_file.php",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                    $("#uploadForm")[0].reset();
+                    $(".custom-file-label").html("Choose File");
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Upload Failed",
+                        text: response.message,
+                        showConfirmButton: true
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An unexpected error occurred.",
+                    showConfirmButton: true
+                });
+            }
+        });
+    });
+
+    // Update file input label
+    $(".custom-file-input").on("change", function() {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+});
+</script>
+  <script>
     $(document).on('change', '.custom-file-input', function (e) {
       var fileName = e.target.files[0].name;
       $(this).next('.custom-file-label').html(fileName);
@@ -180,25 +234,7 @@ $user_id = $_SESSION['user_id'];
   </script>
 
 <script>
-    function showInfoModal(event) {
-        event.preventDefault(); // Prevent form submission
-        $('#infoModal').modal('show'); // Show modal
-        
-        // After the modal is closed, submit the form
-        $('#infoModal').on('hidden.bs.modal', function () {
-            event.target.submit();
-        });
-    }
-
-    // Update file input label when a file is selected
-    $(".custom-file-input").on("change", function() {
-        var fileName = $(this).val().split("\\").pop();
-        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-    });
-
-
-
-    $(document).ready(function () {
+$(document).ready(function () {
     $(".request-download").click(function () {
         let fileId = $(this).attr("data-file-id");
         $("#file-id").val(fileId);
@@ -219,18 +255,27 @@ $user_id = $_SESSION['user_id'];
                 if (response.success) {
                     window.location.href = "download_private_file.php?file_id=" + fileId;
                 } else {
-                    $("#download-error").text(response.message).show();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Incorrect Password",
+                        text: response.message,
+                        showConfirmButton: true
+                    });
                 }
             },
             error: function () {
-                $("#download-error").text("An error occurred. Please try again.").show();
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "An unexpected error occurred. Please try again.",
+                    showConfirmButton: true
+                });
             }
         });
     });
 });
-
-
 </script>
+
 
 </body>
 </html>
